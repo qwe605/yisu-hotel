@@ -1,4 +1,2 @@
-/client-user
-/node-modules
-/.env
-/.env.local
+/client-user/.env
+/client-user/node-modules
