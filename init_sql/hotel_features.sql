@@ -1,0 +1,10 @@
+INSERT INTO `hotel_features` (`id`, `hotel_id`, `feature_type`, `name`, `distance`, `description`) VALUES (1, 1, 'attraction', '静安寺', '500m', '著名历史古迹与商圈');
+INSERT INTO `hotel_features` (`id`, `hotel_id`, `feature_type`, `name`, `distance`, `description`) VALUES (2, 1, 'transport', '静安寺地铁站', '300m', '地铁2/7/14号线交汇');
+INSERT INTO `hotel_features` (`id`, `hotel_id`, `feature_type`, `name`, `distance`, `description`) VALUES (3, 2, 'mall', '万象天地', '1.2km', '大型潮流购物中心');
+INSERT INTO `hotel_features` (`id`, `hotel_id`, `feature_type`, `name`, `distance`, `description`) VALUES (4, 3, 'attraction', '故宫博物院', '800m', '世界文化遗产');
+INSERT INTO `hotel_features` (`id`, `hotel_id`, `feature_type`, `name`, `distance`, `description`) VALUES (5, 4, 'mall', '太古里', '200m', '成都潮流地标');
+INSERT INTO `hotel_features` (`id`, `hotel_id`, `feature_type`, `name`, `distance`, `description`) VALUES (6, 4, 'transport', '春熙路地铁站', '100m', '2号线与3号线');
+INSERT INTO `hotel_features` (`id`, `hotel_id`, `feature_type`, `name`, `distance`, `description`) VALUES (7, 5, 'attraction', '中国美术学院', '300m', '艺术殿堂');
+INSERT INTO `hotel_features` (`id`, `hotel_id`, `feature_type`, `name`, `distance`, `description`) VALUES (8, 6, 'attraction', '大唐不夜城', '200m', '西安最火爆的夜游景区');
+INSERT INTO `hotel_features` (`id`, `hotel_id`, `feature_type`, `name`, `distance`, `description`) VALUES (9, 8, 'attraction', '日光岩', '1.2km', '鼓浪屿最高点');
+INSERT INTO `hotel_features` (`id`, `hotel_id`, `feature_type`, `name`, `distance`, `description`) VALUES (10, 9, 'transport', '五一广场地铁站', '150m', '1号线与2号线枢纽');

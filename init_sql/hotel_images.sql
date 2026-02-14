@@ -1,0 +1,10 @@
+INSERT INTO `hotel_images` (`id`, `hotel_id`, `image_url`, `is_primary`, `display_order`) VALUES (1, 1, 'https://dimg04.c-ctrip.com/images/1mc6h12000ewzkdd5BCCC_W_1280_853_R5_Q70.jpg', 1, 1);
+INSERT INTO `hotel_images` (`id`, `hotel_id`, `image_url`, `is_primary`, `display_order`) VALUES (2, 2, 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4', 1, 1);
+INSERT INTO `hotel_images` (`id`, `hotel_id`, `image_url`, `is_primary`, `display_order`) VALUES (3, 3, 'https://q-xx.bstatic.com/xdata/images/hotel/max1280x900/17468684.jpg?k=cecd4e00e549e831db1ec6c431869f9dae9066e6a603b8bef85e9c8caf779e64&o=', 1, 1);
+INSERT INTO `hotel_images` (`id`, `hotel_id`, `image_url`, `is_primary`, `display_order`) VALUES (4, 4, 'https://images.unsplash.com/photo-1590490360182-c33d57733427', 1, 1);
+INSERT INTO `hotel_images` (`id`, `hotel_id`, `image_url`, `is_primary`, `display_order`) VALUES (5, 5, 'https://pic4.zhimg.com/v2-4aa68e5ae3e421faedd848c3b8dfbe46_r.jpg?source=1940ef5c', 1, 1);
+INSERT INTO `hotel_images` (`id`, `hotel_id`, `image_url`, `is_primary`, `display_order`) VALUES (6, 7, 'https://dimg04.c-ctrip.com/images/0100512000j6bxlg4CFC1_W_2048_1536.jpg_.webp?_fr=wc', 1, 1);
+INSERT INTO `hotel_images` (`id`, `hotel_id`, `image_url`, `is_primary`, `display_order`) VALUES (7, 6, 'https://dimg04.c-ctrip.com/images/200m0g00000087ej5E633_W_1280_853_R5_Q70.jpg', 1, 2);
+INSERT INTO `hotel_images` (`id`, `hotel_id`, `image_url`, `is_primary`, `display_order`) VALUES (8, 8, 'https://dimg04.c-ctrip.com/images/1mc5f12000eug8qw8444E_W_1280_853_R5_Q70.jpg', 1, 3);
+INSERT INTO `hotel_images` (`id`, `hotel_id`, `image_url`, `is_primary`, `display_order`) VALUES (9, 9, 'https://dimg04.c-ctrip.com/images/1mc6r12000hee556p5649_W_1280_853_R5_Q70.jpg', 1, 4);
+INSERT INTO `hotel_images` (`id`, `hotel_id`, `image_url`, `is_primary`, `display_order`) VALUES (10, 1, 'https://dimg04.c-ctrip.com/images/1mc5w12000ck5m8ks761A_W_1280_853_R5_Q70.jpg_.webp?_fr=wc', 1, 2);

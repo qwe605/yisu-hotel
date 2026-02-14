@@ -1,0 +1,39 @@
+version: "3.9"
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: yisu_hotel
+      MYSQL_USER: app
+      MYSQL_PASSWORD: app
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init_sql:/docker-entrypoint-initdb.d
+    command: [ "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci" ]
+  server:
+    build:
+      context: ./server
+    environment:
+      NODE_ENV: production
+      PORT: "3001"
+      DB_HOST: db
+      DB_USER: app
+      DB_PASSWORD: app
+      DB_NAME: yisu_hotel
+      JWT_SECRET: dev-secret
+    depends_on:
+      - db
+    ports:
+      - "3001:3001"
+  client:
+    build:
+      context: ./client-user
+    depends_on:
+      - server
+    ports:
+      - "3000:3000"
+volumes:
+  db_data:

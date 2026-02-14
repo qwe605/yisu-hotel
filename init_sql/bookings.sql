@@ -1,0 +1,7 @@
+INSERT INTO `bookings` (`id`, `user_id`, `room_type_id`, `check_in`, `check_out`, `total_price`, `status`, `created_at`) VALUES (1, 3, 1, '2026-03-10', '2026-03-12', 2400.00, 'confirmed', '2026-02-08 23:17:55');
+INSERT INTO `bookings` (`id`, `user_id`, `room_type_id`, `check_in`, `check_out`, `total_price`, `status`, `created_at`) VALUES (2, 6, 4, '2026-02-01', '2026-02-03', 7000.00, 'checked_out', '2026-02-09 01:22:47');
+INSERT INTO `bookings` (`id`, `user_id`, `room_type_id`, `check_in`, `check_out`, `total_price`, `status`, `created_at`) VALUES (3, 7, 6, '2026-02-20', '2026-02-22', 1040.00, 'pending', '2026-02-09 01:22:47');
+INSERT INTO `bookings` (`id`, `user_id`, `room_type_id`, `check_in`, `check_out`, `total_price`, `status`, `created_at`) VALUES (4, 9, 8, '2026-03-05', '2026-03-07', 1300.00, 'cancelled', '2026-02-09 01:44:25');
+INSERT INTO `bookings` (`id`, `user_id`, `room_type_id`, `check_in`, `check_out`, `total_price`, `status`, `created_at`) VALUES (5, 10, 9, '2026-02-12', '2026-02-13', 450.00, 'checked_in', '2026-02-09 01:44:25');
+INSERT INTO `bookings` (`id`, `user_id`, `room_type_id`, `check_in`, `check_out`, `total_price`, `status`, `created_at`) VALUES (6, 10, 6, '2026-05-01', '2026-05-03', 1760.00, 'confirmed', '2026-02-09 01:44:25');
+INSERT INTO `bookings` (`id`, `user_id`, `room_type_id`, `check_in`, `check_out`, `total_price`, `status`, `created_at`) VALUES (19, 10087, 1, '2026-02-13', '2026-02-18', 12000.00, 'confirmed', '2026-02-11 18:13:25');
