@@ -42,9 +42,29 @@ async function createUser({ username, email, phone, passwordHash }, dbName) {
   return result.insertId;
 }
 
+async function getById(id, dbName) {
+  const tbl = await resolveUserTable(dbName);
+  const [rows] = await pool.query(
+    `SELECT id, username, email, phone, role, collect FROM ${tbl} WHERE id = ? LIMIT 1`,
+    [id]
+  );
+  return rows?.[0] || null;
+}
+
+async function updateCollect(id, collect, dbName) {
+  const tbl = await resolveUserTable(dbName);
+  const [result] = await pool.query(
+    `UPDATE ${tbl} SET collect = ?, updated_at = NOW() WHERE id = ?`,
+    [collect, id]
+  );
+  return result.affectedRows > 0;
+}
+
 module.exports = {
   resolveUserTable,
   findByIdentifier,
   existsUser,
-  createUser
+  createUser,
+  getById,
+  updateCollect
 };

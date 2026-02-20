@@ -7,6 +7,7 @@ const hotelRoutes = require('./routes/hotelRoutes');
 const reservationRoutes = require('./routes/reservationRoutes');
 const authRoutes = require('./routes/authRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
+const userRoutes = require('./routes/userRoutes');
 const { authOptional } = require('./middleware/authMiddleware');
 
 // 加载环境变量
@@ -24,6 +25,7 @@ app.use('/api/hotels', hotelRoutes);
 app.use('/api/reservations', reservationRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/users', userRoutes);
 
 // 健康检查接口
 app.get('/health', (_, res) => {

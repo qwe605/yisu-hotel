@@ -34,6 +34,7 @@ import { HotelListItem, HotelSearchResult } from '../../types';
 import DateRangeSheet from '../../components/DateRangeSheet/DateRangeSheet';
 import favOff from '../../image/收藏-0.svg';
 import favOn from '../../image/收藏-1.svg';
+import { getMyProfile, updateMyCollect } from '../../services/userService';
 import shareIcon from '../../image/分享.svg';
 import mapIcon from '../../image/地图.svg';
 import searchIcon from '../../image/搜索.svg';
@@ -103,6 +104,7 @@ const HotelListPage: React.FC = () => {
   const searchDelayRef = useRef<number | null>(null);
   const [justSelectedEnd, setJustSelectedEnd] = useState<boolean>(false);
   const [favorites, setFavorites] = useState<Record<number, boolean>>({});
+  const [collectIds, setCollectIds] = useState<number[]>([]);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMsg, setSnackbarMsg] = useState<string>('');
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'info' | 'error'>('success');
@@ -114,16 +116,29 @@ const HotelListPage: React.FC = () => {
   );
   const handleToggleFavorite = (id: number) => {
     const next = !favorites[id];
+    const before = collectIds;
+    const after = next ? Array.from(new Set([...before, id])) : before.filter(x => x !== id);
     setFavorites(prev => ({ ...prev, [id]: next }));
-    if (next) {
-      setSnackbarMsg('收藏成功');
-      setSnackbarSeverity('success');
-      setSnackbarOpen(true);
-    } else {
-      setSnackbarMsg('已取消收藏');
-      setSnackbarSeverity('info');
-      setSnackbarOpen(true);
-    }
+    setCollectIds(after);
+    const collectStr = after.join(',');
+    updateMyCollect(collectStr)
+      .then(() => {
+        if (next) {
+          setSnackbarMsg('收藏成功');
+          setSnackbarSeverity('success');
+        } else {
+          setSnackbarMsg('已取消收藏');
+          setSnackbarSeverity('info');
+        }
+        setSnackbarOpen(true);
+      })
+      .catch(() => {
+        setFavorites(prev => ({ ...prev, [id]: !next }));
+        setCollectIds(before);
+        setSnackbarMsg('操作失败，请稍后重试');
+        setSnackbarSeverity('error');
+        setSnackbarOpen(true);
+      });
   };
   const handleShare = async (id: number) => {
     const url = `${window.location.origin}/hotels/${id}`;
@@ -198,6 +213,25 @@ const HotelListPage: React.FC = () => {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  useEffect(() => {
+    const initCollect = async () => {
+      try {
+        const me = await getMyProfile();
+        const ids = String(me.collect || '')
+          .split(',')
+          .map(x => Number(x))
+          .filter(n => Number.isFinite(n));
+        setCollectIds(ids);
+        if (ids.length) {
+          const map: Record<number, boolean> = {};
+          ids.forEach(i => { map[i] = true; });
+          setFavorites(map);
+        }
+      } catch {
+      }
+    };
+    initCollect();
+  }, []);
   // 卸载时清理定位监听
   useEffect(() => {
     return () => {

@@ -3,14 +3,16 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, Button, Container, Typography, Card, CardMedia, CardContent, Snackbar, Alert } from '@mui/material';
 import { Map as BMapGLMap, Marker, NavigationControl, InfoWindow, MapApiLoaderHOC } from 'react-bmapgl';
 import '../HotelListPage/HotelListPage.css';
-import DateRangeSheet from '../../components/DateRangeSheet/DateRangeSheet';
-import { searchHotels } from '../../services/hotelService';
-import { getHotelDetail } from '../../services/hotelService';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { searchHotels, getHotelDetail } from '../../services/hotelService';
 import { HotelDetail, HotelListItem } from '../../types';
 import favOff from '../../image/收藏-0.svg';
 import favOn from '../../image/收藏-1.svg';
 import shareIcon from '../../image/分享.svg';
 import searchIcon from '../../image/搜索.svg';
+import { getMyProfile, updateMyCollect } from '../../services/userService';
+import './MapHotelsPage.css';
 
 function useQuery() {
   const { search } = useLocation();
@@ -54,6 +56,7 @@ const MapHotelsPageInner: React.FC = () => {
   const [selectedImages, setSelectedImages] = useState<any[]>([]);
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
   const [favorites, setFavorites] = useState<Record<number, boolean>>({});
+  const [collectIds, setCollectIds] = useState<number[]>([]);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMsg, setSnackbarMsg] = useState<string>('');
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'info' | 'error'>('success');
@@ -133,16 +136,29 @@ const MapHotelsPageInner: React.FC = () => {
 
   const handleToggleFavorite = (id: number) => {
     const next = !favorites[id];
+    const before = collectIds;
+    const after = next ? Array.from(new Set([...before, id])) : before.filter(x => x !== id);
     setFavorites(prev => ({ ...prev, [id]: next }));
-    if (next) {
-      setSnackbarMsg('收藏成功');
-      setSnackbarSeverity('success');
-      setSnackbarOpen(true);
-    } else {
-      setSnackbarMsg('已取消收藏');
-      setSnackbarSeverity('info');
-      setSnackbarOpen(true);
-    }
+    setCollectIds(after);
+    const collectStr = after.join(',');
+    updateMyCollect(collectStr)
+      .then(() => {
+        if (next) {
+          setSnackbarMsg('收藏成功');
+          setSnackbarSeverity('success');
+        } else {
+          setSnackbarMsg('已取消收藏');
+          setSnackbarSeverity('info');
+        }
+        setSnackbarOpen(true);
+      })
+      .catch(() => {
+        setFavorites(prev => ({ ...prev, [id]: !next }));
+        setCollectIds(before);
+        setSnackbarMsg('操作失败，请稍后重试');
+        setSnackbarSeverity('error');
+        setSnackbarOpen(true);
+      });
   };
 
   const handleShare = async (id: number) => {
@@ -177,6 +193,26 @@ const MapHotelsPageInner: React.FC = () => {
     };
     loadDetail();
   }, [selectedId]);
+
+  useEffect(() => {
+    const initCollect = async () => {
+      try {
+        const me = await getMyProfile();
+        const ids = String(me.collect || '')
+          .split(',')
+          .map(x => Number(x))
+          .filter(n => Number.isFinite(n));
+        setCollectIds(ids);
+        if (ids.length) {
+          const map: Record<number, boolean> = {};
+          ids.forEach(i => { map[i] = true; });
+          setFavorites(map);
+        }
+      } catch {
+      }
+    };
+    initCollect();
+  }, []);
 
   const userIcon = useMemo(() => {
     const B = (window as any).BMapGL;
@@ -490,10 +526,10 @@ const MapHotelsPageInner: React.FC = () => {
 
   return (
     <>
-      <Container maxWidth={false} sx={{ position: 'relative', height: '100vh', padding: '0 !important', overflow: 'hidden' }}>
-        <Box className="top-controls-sticky" style={{ position: 'absolute', top: 12, left: 0, right: 0, zIndex: 10, pointerEvents: 'none', display: 'flex', justifyContent: 'center' }}>
-          <Box className="core-header pill" style={{ padding: '12px', margin: '0 auto', width: 'fit-content', pointerEvents: 'auto' }}>
-            <Box className="core-row" sx={{ maxWidth: 'unset', width: 'auto' }}>
+      <Container maxWidth={false} className="map-container">
+        <Box className="top-controls-sticky">
+          <Box className="core-header pill">
+            <Box className="core-row">
               <Button className="back-icon" aria-label="返回" onClick={() => navigate(`/hotels?${new URLSearchParams(window.location.search).toString()}`)} sx={{ minWidth: 24, p: 0 }} />
               <Button className="loc-link" onClick={handleRelocate} aria-label="我的位置">我的位置</Button>
               <span className="divider" aria-hidden="true" />
@@ -518,14 +554,13 @@ const MapHotelsPageInner: React.FC = () => {
               </Button>
               <span className="divider" aria-hidden="true" />
               <Box className="search-wrap">
-                <img src={searchIcon} alt="搜索" style={{ width: 24, height: 24 }} />
+                <img src={searchIcon} alt="搜索" className="search-icon-img" />
                 <input
                   aria-label="搜索"
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
                   placeholder="位置/品牌/酒店"
                   className="search-input"
-                  style={{ pointerEvents: 'auto' }}
                   onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
                 />
                 <Button className="search-btn" variant="contained" onClick={handleSearch} aria-label="搜索">搜索</Button>
@@ -534,7 +569,7 @@ const MapHotelsPageInner: React.FC = () => {
           </Box>
         </Box>
         {!akMissing && (
-          <Box ref={mapWrapRef} sx={{ height: '100%', width: '100%' }}>
+          <Box ref={mapWrapRef} className="map-wrap">
             <BMapGLMap
               style={{ height: '100%', width: '100%' }}
               center={getSafeCenterPoint()}
@@ -571,15 +606,16 @@ const MapHotelsPageInner: React.FC = () => {
               }}
               onReady={() => {
                 setMapReady(true);
-                const map = mapRef.current;
-                if (map) {
-                  try {
+                // 延迟确保百度地图内部异步逻辑执行完毕
+                setTimeout(() => {
+                  const map = mapRef.current;
+                  if (map) {
+                    (window as any).map = map; // 成功暴露后，控制台将不再是 undefined
                     if (typeof map.enableDragging === 'function') map.enableDragging();
                     if (typeof map.enableScrollWheelZoom === 'function') map.enableScrollWheelZoom(true);
-                  } catch (e) {
-
+                    console.log("地图交互已强制开启");
                   }
-                }
+                }, 300);
               }}>
               <NavigationControl />
               {
@@ -609,7 +645,7 @@ const MapHotelsPageInner: React.FC = () => {
         }
         {
           selectedDetail && (
-            <Box ref={bottomCardRef} sx={{ position: 'absolute', left: 12, right: 12, bottom: 12, zIndex: 9 }}>
+            <Box ref={bottomCardRef} className="bottom-card-wrap">
               <Card sx={{ borderRadius: 2, cursor: 'pointer', position: 'relative' }} onClick={() => navigate(`/hotels/${selectedDetail.id}`)}>
                 <Box className="card-top-right">
                   <Button
@@ -634,12 +670,12 @@ const MapHotelsPageInner: React.FC = () => {
                   </Button>
                 </Box>
                 {galleryImages.length > 0 && (
-                  <Box sx={{ display: 'flex', gap: 1, p: 1, overflowX: 'auto' }}>
+                  <Box className="gallery-row">
                     {galleryImages.map((img: any, idx: number) => {
                       const src = typeof img === 'string'
                         ? img
                         : (img?.image_url || img?.url || img?.src || '');
-                      return <CardMedia key={idx} component="img" sx={{ width: 180, height: 120, borderRadius: 1 }} image={src} />;
+                      return <CardMedia key={idx} component="img" className="gallery-img" image={src} />;
                     })}
                   </Box>
                 )}
@@ -663,26 +699,93 @@ const MapHotelsPageInner: React.FC = () => {
           )
         }
         {/* 调试面板移除 */}
-        {coreCalOpen && (
-          <DateRangeSheet
-            open={coreCalOpen}
-            onClose={() => setCoreCalOpen(false)}
-            checkIn={checkIn}
-            checkOut={checkOut}
-            setCheckIn={(d) => setCheckIn(d as Date)}
-            setCheckOut={(d) => setCheckOut(d as Date)}
-            nights={nights}
-            setNights={(n) => setNights(n)}
-            monthsShown={2}
-            onAutoConfirm={() => {
-              const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-              const params = new URLSearchParams(window.location.search);
-              params.set('check_in', fmt(checkIn));
-              params.set('check_out', fmt(checkOut));
-              navigate(`/map?${params.toString()}`);
-            }}
-          />
-        )}
+        {
+          coreCalOpen && (
+            <>
+              <div
+                ref={calendarMaskRef}
+                className="sheet-mask"
+                onClick={() => setCoreCalOpen(false)}
+                aria-hidden="true"
+              />
+              <Box className="bottom-sheet" role="dialog" aria-label="选择日期">
+                <Box className="sheet-header">
+                  <span className="handle-bar" aria-hidden="true" />
+                  <Typography variant="subtitle1">选择日期</Typography>
+                  <Button onClick={() => setCoreCalOpen(false)} aria-label="关闭">✕</Button>
+                </Box>
+                <Typography color="text.secondary" sx={{ px: 1, mb: 1 }}>
+                  {calendarPhase === 'start' ? '请选择入住日期' : '请选择离店日期'}
+                </Typography>
+                <DatePicker
+                  inline
+                  selectsRange
+                  monthsShown={2}
+                  startDate={checkIn}
+                  endDate={tempEnd ?? checkOut}
+                  onChange={(range) => {
+                    const [start, end] = range as [Date | null, Date | null];
+                    const norm = (d: Date | null) => {
+                      if (!d) return null;
+                      const nd = new Date(d);
+                      nd.setHours(0, 0, 0, 0);
+                      return nd;
+                    };
+                    const s = norm(start);
+                    const e = norm(end);
+                    if (calendarPhase === 'start' && s) {
+                      setCheckIn(s as Date);
+                      setTempEnd(null);
+                      setCalendarPhase('end');
+                      return;
+                    }
+                    if (calendarPhase === 'end') {
+                      const clicked = e ?? s;
+                      const target = norm(clicked);
+                      if (!target) return;
+                      if (target.getTime() > checkIn.getTime()) {
+                        setTempEnd(target as Date);
+                        setJustSelectedEnd(true);
+                        const ms = (target.getTime() - checkIn.getTime());
+                        setNights(Math.max(1, Math.round(ms / (24 * 3600 * 1000))));
+                      } else if (target.getTime() < checkIn.getTime()) {
+                        setCheckIn(target as Date);
+                        const endBase = tempEnd ?? checkOut;
+                        if (endBase && endBase.getTime() > target.getTime()) {
+                          const ms = (endBase.getTime() - target.getTime());
+                          setNights(Math.max(1, Math.round(ms / (24 * 3600 * 1000))));
+                        } else {
+                          setNights(1);
+                        }
+                      }
+                    }
+                  }}
+                  minDate={(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; })()}
+                />
+                <Box className="sheet-footer">
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    onClick={() => {
+                      if (tempEnd && tempEnd.getTime() > checkIn.getTime()) {
+                        setCheckOut(tempEnd as Date);
+                        setCalendarPhase('start');
+                        setCoreCalOpen(false);
+                        const ms = (tempEnd.getTime() - checkIn.getTime());
+                        setNights(Math.max(1, Math.round(ms / (24 * 3600 * 1000))));
+                      } else {
+                        setCoreCalOpen(false);
+                      }
+                    }}
+                  >
+                    确认选择 · 共 {nights} 晚
+                  </Button>
+                </Box>
+              </Box>
+            </>
+          )
+        }
       </Container >
       <Snackbar
         open={snackbarOpen}

@@ -3,9 +3,12 @@
 // 数据来源：GET /api/reservations/my（需 JWT），封装于 reservationService.listMyReservations
 // 交互：Tabs 切换触发刷新；取消后刷新；再次预订跳到酒店详情
 import React, { useEffect, useState } from 'react';
-import { Container, Box, Typography, Tabs, Tab, Card, CardContent, Button } from '@mui/material';
+import { Container, Box, Typography, Tabs, Tab, Card, CardContent, Button, Avatar, CardMedia } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { listMyReservations, cancelReservation } from '../../services/reservationService';
+import { getHotelDetail } from '../../services/hotelService';
+import { getMyProfile } from '../../services/userService';
+import backIcon from '../../image/返回.svg';
 
 // 列表范围枚举：与后端保持一致，仅 'upcoming'（即将入住）与 'past'（历史订单）
 type Scope = 'upcoming' | 'past';
@@ -38,6 +41,10 @@ const MyBookingsPage: React.FC = () => {
   const [error, setError] = useState('');
   // 路由跳转器：用于“再次预订”进入酒店详情
   const navigate = useNavigate();
+  const [userName, setUserName] = useState<string>('');
+  const [userEmail, setUserEmail] = useState<string>('');
+  const [favoritesIds, setFavoritesIds] = useState<number[]>([]);
+  const [favoriteHotels, setFavoriteHotels] = useState<Array<any>>([]);
 
   // 拉取我的预订列表：
   // - 进入页面或切换 Tab 时调用
@@ -60,6 +67,54 @@ const MyBookingsPage: React.FC = () => {
     fetchList(scope);
   }, [scope]);
 
+  useEffect(() => {
+    const initUser = async () => {
+      try {
+        const me = await getMyProfile();
+        setUserName(me.username || '游客');
+        setUserEmail(me.email || '');
+        const ids = String(me.collect || '')
+          .split(',')
+          .map(x => Number(x))
+          .filter(n => Number.isFinite(n));
+        setFavoritesIds(ids);
+      } catch {
+        const name = localStorage.getItem('userName') || localStorage.getItem('username') || '游客';
+        const email = localStorage.getItem('userEmail') || localStorage.getItem('email') || '';
+        setUserName(name);
+        setUserEmail(email);
+        setFavoritesIds([]);
+      }
+    };
+    initUser();
+  }, []);
+
+  useEffect(() => {
+    let aborted = false;
+    const loadFavs = async () => {
+      if (!favoritesIds.length) {
+        setFavoriteHotels([]);
+        return;
+      }
+      const unique = Array.from(new Set(favoritesIds)).slice(0, 20);
+      try {
+        const list = await Promise.all(unique.map(async (id) => {
+          try {
+            const resp = await getHotelDetail(id);
+            return resp?.hotel ? resp.hotel : null;
+          } catch {
+            return null;
+          }
+        }));
+        if (!aborted) setFavoriteHotels(list.filter(Boolean));
+      } catch {
+        if (!aborted) setFavoriteHotels([]);
+      }
+    };
+    loadFavs();
+    return () => { aborted = true; };
+  }, [favoritesIds]);
+
   // 取消预订：调用后端删除/置为取消；成功后刷新列表
   const handleCancel = async (id: number) => {
     try {
@@ -78,8 +133,19 @@ const MyBookingsPage: React.FC = () => {
 
   return (
     <Container maxWidth="md" sx={{ mt: 2 }}>
-      {/* 页面标题与范围切换 Tabs */}
-      <Typography variant="h6" gutterBottom>我的预订</Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+        <Button onClick={() => navigate(-1)} aria-label="返回" sx={{ minWidth: 0, p: 0.5 }}>
+          <img src={backIcon} alt="返回" style={{ width: 20, height: 20 }} />
+        </Button>
+        <Typography variant="h6">我的预订</Typography>
+      </Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+        <Avatar sx={{ bgcolor: '#1976d2' }}>{(userName || '游').slice(0, 1).toUpperCase()}</Avatar>
+        <Box>
+          <Typography fontWeight={600}>{userName || '游客'}</Typography>
+          {userEmail && <Typography color="text.secondary">{userEmail}</Typography>}
+        </Box>
+      </Box>
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
         <Tabs value={scope} onChange={(_, v) => setScope(v)}>
           <Tab label="即将入住" value="upcoming" />
@@ -89,7 +155,6 @@ const MyBookingsPage: React.FC = () => {
       {loading && <Typography>加载中...</Typography>}
       {error && <Typography color="error">{error}</Typography>}
       {!loading && items.length === 0 && <Typography>暂无相关订单</Typography>}
-      {/* 列表卡片：逐条展示订单的酒店与房型信息、日期与状态、操作按钮 */}
       <Box display="flex" flexDirection="column" gap={2}>
         {items.map(it => (
           <Card key={it.id} variant="outlined">
@@ -117,6 +182,27 @@ const MyBookingsPage: React.FC = () => {
             </CardContent>
           </Card>
         ))}
+      </Box>
+      <Box sx={{ mt: 3 }}>
+        <Typography variant="h6" gutterBottom>我的收藏</Typography>
+        {favoriteHotels.length === 0 && <Typography color="text.secondary">暂无收藏</Typography>}
+        {favoriteHotels.length > 0 && (
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+            {favoriteHotels.map((h: any) => (
+              <Card key={h.id} sx={{ width: 280, cursor: 'pointer' }} onClick={() => navigate(`/hotels/${h.id}`)}>
+                {h.cover_image && <CardMedia component="img" image={h.cover_image} sx={{ height: 140 }} />}
+                <CardContent>
+                  <Typography fontWeight={700}>{h.name_zh}</Typography>
+                  {h.address && <Typography color="text.secondary" sx={{ mt: 0.5 }}>{h.address}</Typography>}
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                    <Typography color="primary">¥{h.min_price || 0} 起</Typography>
+                    {h.star_rating != null && <Typography color="text.secondary">⭐ {h.star_rating}</Typography>}
+                  </Box>
+                </CardContent>
+              </Card>
+            ))}
+          </Box>
+        )}
       </Box>
     </Container>
   );
