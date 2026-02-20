@@ -25,13 +25,13 @@
   position: sticky;
 }
 
-.top-controls-sticky {
+/* .top-controls-sticky {
   position: sticky;
   top: 0;
   z-index: 100;
   background: #fff;
   padding-bottom: 6px;
-}
+} */
 
 .core-row {
   display: flex;

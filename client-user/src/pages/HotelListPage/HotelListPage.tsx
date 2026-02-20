@@ -11,6 +11,11 @@ import {
   CardContent,
   CardActions,
   Button,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
   Pagination,
   Chip,
   Skeleton,
@@ -54,6 +59,7 @@ const HotelListPage: React.FC = () => {
   const [cityName, setCityName] = useState<string>(q.city_name || '');
   const [cityId, setCityId] = useState<string>(q.city_id || '');
   const [cityInput, setCityInput] = useState<string>(q.city_name || '');
+  const [citySuggest, setCitySuggest] = useState<string[]>([]);
   const [cityLoading, setCityLoading] = useState<boolean>(false);
   const [cityError, setCityError] = useState<string>('');
   const hotCities = ['北京', '上海', '广州', '深圳', '杭州', '武汉', '成都', '重庆', '西安', '南京', '天津', '苏州', '厦门', '青岛', '长沙', '郑州', '济南', '合肥', '福州', '宁波', '无锡', '南昌', '昆明', '大理', '桂林', '丽江', '海口', '三亚', '珠海', '佛山', '东莞', '沈阳', '大连', '哈尔滨', '长春', '呼和浩特', '乌鲁木齐', '南宁', '贵阳', '兰州', '西宁', '拉萨', '香港', '澳门'];
@@ -92,6 +98,8 @@ const HotelListPage: React.FC = () => {
   const [titleOpacity, setTitleOpacity] = useState(0);
   const tabOptions = ['智能排序', '价格/星级/距离'];
   const [coreCalOpen, setCoreCalOpen] = useState<boolean>(false);
+  const [calendarPhase, setCalendarPhase] = useState<'start' | 'end'>('start');
+  const [tempEnd, setTempEnd] = useState<Date | null>(null);
   const searchDelayRef = useRef<number | null>(null);
   const [justSelectedEnd, setJustSelectedEnd] = useState<boolean>(false);
   const [favorites, setFavorites] = useState<Record<number, boolean>>({});
@@ -545,7 +553,7 @@ const HotelListPage: React.FC = () => {
             <span className="divider" aria-hidden="true" />
             <Button
               className="date-pill"
-              onClick={() => {setCoreCalOpen(true); }}
+              onClick={() => { setCalendarPhase('start'); setCoreCalOpen(true); }}
               aria-label="选择入住与离店日期"
             >
               <div className="date-col">
