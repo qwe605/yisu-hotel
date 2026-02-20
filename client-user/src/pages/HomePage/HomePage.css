@@ -1,0 +1,247 @@
+/* 首页样式 */
+/* 作用：为搜索区域与推荐区提供基础视觉样式 */
+.home-container {
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
+.hero {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .12);
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+
+/* 固定轮播区域为 16:9 比例，统一高度 */
+.hero::before {
+  content: '';
+  display: block;
+  padding-top: 56.25%;
+}
+
+.hero-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hero-dots {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+}
+
+.hero-dots .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, .6);
+}
+
+.hero-dots .dot.active {
+  background: #0086F6;
+}
+
+.promo-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: #FFF7E6;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .06);
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+
+.promo-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.promo-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #8A4B02;
+}
+
+.promo-desc {
+  font-size: 13px;
+}
+
+.promo-cta {
+  align-self: flex-start;
+}
+
+.promo-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.promo-dots .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, .15);
+}
+
+.promo-dots .dot.active {
+  background: #F59E0B;
+}
+
+.search-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row {
+  padding: 10px 6px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.location-row .MuiChip-root {
+  background: #EAF5FF;
+  color: #0086F6;
+}
+
+.search-input-row .MuiInputBase-root {
+  background: #fff;
+}
+
+.suggest-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  margin-top: 6px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .12);
+  padding: 6px;
+  z-index: 1002;
+}
+
+.suggest-item {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: #222;
+}
+
+.suggest-item:hover {
+  background: #F7FAFF;
+}
+
+.suggest-name {
+  font-weight: 600;
+}
+
+.suggest-addr {
+  color: #666;
+  font-size: 12px;
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.datepicker-input {
+  width: 100%;
+  height: 40px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 0 12px;
+}
+
+.backdrop-blur {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .2);
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.bottom-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-width: 640px;
+  margin: 0 auto;
+  background: #fff;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  box-shadow: 0 -6px 20px rgba(0, 0, 0, .15);
+  padding: 12px;
+  z-index: 1200;
+  isolation: isolate;
+}
+
+.blur-wrap {
+  position: relative;
+}
+
+.blur-wrap.blurred {
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+/* 日历日单元样式与列表页保持一致 */
+.react-datepicker__day {
+  width: 44px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+}
+
+.day-cell {
+  position: relative;
+  width: 36px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+}
+
+.day-cell.start,
+.day-cell.end {
+  background: #0086F6;
+  border-radius: 6px;
+  color: #fff;
+}
+
+.day-cell .day-num {
+  font-size: 14px;
+}
+
+.day-cell .day-tag {
+  position: absolute;
+  bottom: 4px;
+  right: 2px;
+  font-size: 10px;
+  color: #fff;
+}

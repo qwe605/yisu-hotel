@@ -1,0 +1,117 @@
+/* 日历总体容器：取消边框、统一字体、铺满宽度 */
+.modern-hotel-calendar {
+  border: none !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  width: 100% !important;
+}
+
+.modern-hotel-calendar .react-datepicker__header {
+  background-color: #fff !important;
+  border-bottom: none !important;
+  padding-top: 20px !important;
+}
+
+.modern-hotel-calendar .react-datepicker__day-name {
+  width: 14.28% !important;
+  margin: 0 !important;
+  color: #999;
+  font-size: 14px;
+}
+
+.modern-hotel-calendar .react-datepicker__day-name:first-child,
+.modern-hotel-calendar .react-datepicker__day-name:last-child {
+  color: #ff4d4f;
+}
+
+.custom-day-cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 64px;
+  width: 100%;
+  position: relative;
+}
+
+.holiday-tag {
+  font-size: 10px;
+  height: 14px;
+  color: #ff4d4f;
+  line-height: 14px;
+}
+
+.work-tag {
+  color: #333 !important;
+}
+
+.day-num {
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 22px;
+}
+
+.status-tag {
+  font-size: 10px;
+  height: 14px;
+  line-height: 14px;
+}
+
+/* 日期格子：严格 7 等分，为连续色块提供基础；使用 inline-block 保持原栅格，不破坏布局 */
+.modern-hotel-calendar .react-datepicker__day {
+  width: 14.28% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  height: 64px;
+  box-sizing: border-box;
+  display: inline-block;
+  vertical-align: top;
+  transition: background 0.2s;
+}
+
+.modern-hotel-calendar .react-datepicker__day--selected,
+.modern-hotel-calendar .react-datepicker__day--range-start,
+.modern-hotel-calendar .react-datepicker__day--range-end {
+  background-color: #1677ff !important;
+  color: white !important;
+}
+
+.modern-hotel-calendar .react-datepicker__day--in-range:not(.react-datepicker__day--range-start):not(.react-datepicker__day--range-end) {
+  background-color: rgba(22, 119, 255, 0.08) !important;
+  color: #1677ff !important;
+}
+
+.modern-hotel-calendar .react-datepicker__day--disabled {
+  color: #ccc !important;
+  background-color: transparent !important;
+}
+
+.modern-hotel-calendar .react-datepicker__current-month {
+  text-align: left;
+  padding-left: 15px;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+/* 标题栏与周标题优化 */
+.modern-hotel-calendar .react-datepicker__header {
+  border-bottom: 1px solid #f0f0f0 !important;
+  padding: 0 !important;
+}
+
+.modern-hotel-calendar .react-datepicker__day-names {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+  background: #f9f9f9;
+}
+
+.modern-hotel-calendar .react-datepicker__navigation {
+  top: 15px;
+}
+
+/* bottom-sheet 过渡动画（增强质感） */
+.bottom-sheet {
+  transition: transform 0.3s ease-out;
+}
