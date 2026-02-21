@@ -1,0 +1,87 @@
+.map-container {
+  padding: 0 !important;
+  margin: 0 !important;
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* 允许顶部控件悬浮且不阻挡地图底层点击 */
+.map-container .top-controls-sticky {
+  position: absolute;
+  top: 12px;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+}
+
+/* 顶部胶囊容器恢复交互能力 */
+.map-container .core-header.pill {
+  pointer-events: auto;
+  background: white;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  padding: 4px 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  margin: 0 auto;
+  width: fit-content;
+}
+
+/* 取消列表页对内部行宽度的限制 */
+.map-container .core-header.pill .core-row {
+  max-width: unset;
+  width: auto;
+}
+
+/* 底部卡片容器 */
+.map-container .bottom-card-wrap {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  z-index: 9;
+  pointer-events: none;
+}
+
+/* 卡片在地图页内允许点击 */
+.map-container .hotel-card {
+  pointer-events: auto;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* 地图包裹容器尺寸 */
+.map-container .map-wrap {
+  height: 100%;
+  width: 100%;
+}
+
+/* 保持百度地图遮罩层可交互 */
+.map-container .BMap_mask {
+  pointer-events: auto !important;
+}
+
+/* 搜索图标尺寸 */
+.map-container .search-icon-img {
+  width: 24px;
+  height: 24px;
+}
+
+/* 图片画廊行 */
+.map-container .gallery-row {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  overflow-x: auto;
+}
+
+/* 图片画廊图片 */
+.map-container .gallery-img {
+  width: 180px;
+  height: 120px;
+  border-radius: 4px;
+}
