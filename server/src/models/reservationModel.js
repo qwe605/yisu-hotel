@@ -55,9 +55,28 @@ async function listBookings(userId, scope, limit, offset) {
   return rows;
 }
 
+async function countBookings(userId, scope) {
+  const sql = `
+    SELECT COUNT(*) AS total
+    FROM bookings b
+    JOIN room_types rt ON rt.id = b.room_type_id
+    JOIN hotels h ON h.id = rt.hotel_id
+    WHERE b.user_id = ?
+      AND (
+        (? = 'upcoming' AND b.check_in >= CURDATE() AND b.status IN ('pending','confirmed'))
+        OR
+        (? = 'past' AND b.status IN ('checked_out','cancelled'))
+      )
+  `;
+  const params = [userId, scope, scope];
+  const [rows] = await pool.query(sql, params);
+  return rows?.[0]?.total || 0;
+}
+
 module.exports = {
   ensureTable,
   insertBooking,
   deleteBooking,
-  listBookings
+  listBookings,
+  countBookings
 };

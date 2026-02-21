@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, Button, Container, Typography, Card, CardMedia, CardContent, Snackbar, Alert } from '@mui/material';
 import { Map as BMapGLMap, Marker, NavigationControl, InfoWindow, MapApiLoaderHOC } from 'react-bmapgl';
 import '../HotelListPage/HotelListPage.css';
-import DatePicker from 'react-datepicker';
+import DateRangeSheet from '../../components/DateRangeSheet/DateRangeSheet';
 import 'react-datepicker/dist/react-datepicker.css';
 import { searchHotels, getHotelDetail } from '../../services/hotelService';
 import { HotelDetail, HotelListItem } from '../../types';
@@ -698,94 +698,19 @@ const MapHotelsPageInner: React.FC = () => {
             </Box>
           )
         }
-        {/* 调试面板移除 */}
-        {
-          coreCalOpen && (
-            <>
-              <div
-                ref={calendarMaskRef}
-                className="sheet-mask"
-                onClick={() => setCoreCalOpen(false)}
-                aria-hidden="true"
-              />
-              <Box className="bottom-sheet" role="dialog" aria-label="选择日期">
-                <Box className="sheet-header">
-                  <span className="handle-bar" aria-hidden="true" />
-                  <Typography variant="subtitle1">选择日期</Typography>
-                  <Button onClick={() => setCoreCalOpen(false)} aria-label="关闭">✕</Button>
-                </Box>
-                <Typography color="text.secondary" sx={{ px: 1, mb: 1 }}>
-                  {calendarPhase === 'start' ? '请选择入住日期' : '请选择离店日期'}
-                </Typography>
-                <DatePicker
-                  inline
-                  selectsRange
-                  monthsShown={2}
-                  startDate={checkIn}
-                  endDate={tempEnd ?? checkOut}
-                  onChange={(range) => {
-                    const [start, end] = range as [Date | null, Date | null];
-                    const norm = (d: Date | null) => {
-                      if (!d) return null;
-                      const nd = new Date(d);
-                      nd.setHours(0, 0, 0, 0);
-                      return nd;
-                    };
-                    const s = norm(start);
-                    const e = norm(end);
-                    if (calendarPhase === 'start' && s) {
-                      setCheckIn(s as Date);
-                      setTempEnd(null);
-                      setCalendarPhase('end');
-                      return;
-                    }
-                    if (calendarPhase === 'end') {
-                      const clicked = e ?? s;
-                      const target = norm(clicked);
-                      if (!target) return;
-                      if (target.getTime() > checkIn.getTime()) {
-                        setTempEnd(target as Date);
-                        setJustSelectedEnd(true);
-                        const ms = (target.getTime() - checkIn.getTime());
-                        setNights(Math.max(1, Math.round(ms / (24 * 3600 * 1000))));
-                      } else if (target.getTime() < checkIn.getTime()) {
-                        setCheckIn(target as Date);
-                        const endBase = tempEnd ?? checkOut;
-                        if (endBase && endBase.getTime() > target.getTime()) {
-                          const ms = (endBase.getTime() - target.getTime());
-                          setNights(Math.max(1, Math.round(ms / (24 * 3600 * 1000))));
-                        } else {
-                          setNights(1);
-                        }
-                      }
-                    }
-                  }}
-                  minDate={(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; })()}
-                />
-                <Box className="sheet-footer">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    onClick={() => {
-                      if (tempEnd && tempEnd.getTime() > checkIn.getTime()) {
-                        setCheckOut(tempEnd as Date);
-                        setCalendarPhase('start');
-                        setCoreCalOpen(false);
-                        const ms = (tempEnd.getTime() - checkIn.getTime());
-                        setNights(Math.max(1, Math.round(ms / (24 * 3600 * 1000))));
-                      } else {
-                        setCoreCalOpen(false);
-                      }
-                    }}
-                  >
-                    确认选择 · 共 {nights} 晚
-                  </Button>
-                </Box>
-              </Box>
-            </>
-          )
-        }
+
+        {coreCalOpen && (
+          <DateRangeSheet
+            open={coreCalOpen}
+            onClose={() => setCoreCalOpen(false)}
+            checkIn={checkIn}
+            checkOut={checkOut}
+            setCheckIn={(d) => setCheckIn(d as Date)}
+            setCheckOut={(d) => setCheckOut(d as Date)}
+            monthsShown={2}
+            onAutoConfirm={() => handleSearch()}
+          />
+        )}
       </Container >
       <Snackbar
         open={snackbarOpen}

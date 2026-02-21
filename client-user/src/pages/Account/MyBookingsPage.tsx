@@ -3,7 +3,7 @@
 // 数据来源：GET /api/reservations/my（需 JWT），封装于 reservationService.listMyReservations
 // 交互：Tabs 切换触发刷新；取消后刷新；再次预订跳到酒店详情
 import React, { useEffect, useState } from 'react';
-import { Container, Box, Typography, Tabs, Tab, Card, CardContent, Button, Avatar, CardMedia } from '@mui/material';
+import { Container, Box, Typography, Tabs, Tab, Card, CardContent, Button, Avatar, CardMedia, Pagination } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { listMyReservations, cancelReservation } from '../../services/reservationService';
 import { getHotelDetail } from '../../services/hotelService';
@@ -45,16 +45,27 @@ const MyBookingsPage: React.FC = () => {
   const [userEmail, setUserEmail] = useState<string>('');
   const [favoritesIds, setFavoritesIds] = useState<number[]>([]);
   const [favoriteHotels, setFavoriteHotels] = useState<Array<any>>([]);
+  const [bookingPage, setBookingPage] = useState<number>(1);
+  const [bookingPageSize, setBookingPageSize] = useState<number>(5);
+  const [bookingsTotal, setBookingsTotal] = useState<number>(0);
+  const [favoritesPage, setFavoritesPage] = useState<number>(1);
+  const [favoritesPageSize, setFavoritesPageSize] = useState<number>(5);
+  const [favoritesTotal, setFavoritesTotal] = useState<number>(0);
 
   // 拉取我的预订列表：
   // - 进入页面或切换 Tab 时调用
   // - 统一设置 loading 与错误文案，成功后渲染列表
-  const fetchList = async (s: Scope) => {
+  const fetchList = async (s: Scope, p?: number, ps?: number) => {
     setLoading(true);
     setError('');
     try {
-      const resp = await listMyReservations(s, 1, 20);
+      const pageArg = p ?? bookingPage;
+      const sizeArg = ps ?? bookingPageSize;
+      const resp = await listMyReservations(s, pageArg, sizeArg);
       setItems(resp.items || []);
+      setBookingsTotal(Number(resp.total || 0));
+      setBookingPage(Number(resp.page || pageArg));
+      setBookingPageSize(Number(resp.pageSize || sizeArg));
     } catch (e: any) {
       setError(e?.response?.data?.message || '加载失败');
     } finally {
@@ -64,7 +75,8 @@ const MyBookingsPage: React.FC = () => {
 
   // 监听 scope 变化，自动刷新当前 Tab 的数据
   useEffect(() => {
-    fetchList(scope);
+    setBookingPage(1);
+    fetchList(scope, 1, bookingPageSize);
   }, [scope]);
 
   useEffect(() => {
@@ -78,12 +90,14 @@ const MyBookingsPage: React.FC = () => {
           .map(x => Number(x))
           .filter(n => Number.isFinite(n));
         setFavoritesIds(ids);
+        setFavoritesPage(1);
       } catch {
         const name = localStorage.getItem('userName') || localStorage.getItem('username') || '游客';
         const email = localStorage.getItem('userEmail') || localStorage.getItem('email') || '';
         setUserName(name);
         setUserEmail(email);
         setFavoritesIds([]);
+        setFavoritesPage(1);
       }
     };
     initUser();
@@ -94,11 +108,15 @@ const MyBookingsPage: React.FC = () => {
     const loadFavs = async () => {
       if (!favoritesIds.length) {
         setFavoriteHotels([]);
+        setFavoritesTotal(0);
         return;
       }
-      const unique = Array.from(new Set(favoritesIds)).slice(0, 20);
+      const unique = Array.from(new Set(favoritesIds));
+      setFavoritesTotal(unique.length);
+      const start = Math.max((favoritesPage - 1) * favoritesPageSize, 0);
+      const slice = unique.slice(start, start + favoritesPageSize);
       try {
-        const list = await Promise.all(unique.map(async (id) => {
+        const list = await Promise.all(slice.map(async (id) => {
           try {
             const resp = await getHotelDetail(id);
             return resp?.hotel ? resp.hotel : null;
@@ -113,7 +131,7 @@ const MyBookingsPage: React.FC = () => {
     };
     loadFavs();
     return () => { aborted = true; };
-  }, [favoritesIds]);
+  }, [favoritesIds, favoritesPage, favoritesPageSize]);
 
   // 取消预订：调用后端删除/置为取消；成功后刷新列表
   const handleCancel = async (id: number) => {
@@ -130,6 +148,15 @@ const MyBookingsPage: React.FC = () => {
   const handleRebook = (hotel_id: number) => {
     navigate(`/hotels/${hotel_id}`);
   };
+  const handleLogout = () => {
+    try {
+      localStorage.removeItem('token');
+      localStorage.removeItem('userId');
+      localStorage.removeItem('userName');
+      localStorage.removeItem('userEmail');
+    } catch { }
+    navigate('/login');
+  };
 
   return (
     <Container maxWidth="md" sx={{ mt: 2 }}>
@@ -145,6 +172,8 @@ const MyBookingsPage: React.FC = () => {
           <Typography fontWeight={600}>{userName || '游客'}</Typography>
           {userEmail && <Typography color="text.secondary">{userEmail}</Typography>}
         </Box>
+        <Box sx={{ flexGrow: 1 }} />
+        <Button variant="outlined" onClick={handleLogout}>退出登录</Button>
       </Box>
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
         <Tabs value={scope} onChange={(_, v) => setScope(v)}>
@@ -183,6 +212,19 @@ const MyBookingsPage: React.FC = () => {
           </Card>
         ))}
       </Box>
+      {!loading && bookingsTotal > 0 && (
+        <Box display="flex" justifyContent="center" mt={2}>
+          <Pagination
+            count={Math.ceil(bookingsTotal / bookingPageSize)}
+            page={bookingPage}
+            onChange={(_, value) => {
+              setBookingPage(value);
+              fetchList(scope, value, bookingPageSize);
+            }}
+            color="primary"
+          />
+        </Box>
+      )}
       <Box sx={{ mt: 3 }}>
         <Typography variant="h6" gutterBottom>我的收藏</Typography>
         {favoriteHotels.length === 0 && <Typography color="text.secondary">暂无收藏</Typography>}
@@ -201,6 +243,16 @@ const MyBookingsPage: React.FC = () => {
                 </CardContent>
               </Card>
             ))}
+          </Box>
+        )}
+        {favoritesTotal > 0 && (
+          <Box display="flex" justifyContent="center" mt={2}>
+            <Pagination
+              count={Math.ceil(favoritesTotal / favoritesPageSize)}
+              page={favoritesPage}
+              onChange={(_, value) => setFavoritesPage(value)}
+              color="primary"
+            />
           </Box>
         )}
       </Box>

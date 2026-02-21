@@ -41,7 +41,8 @@ async function listMyReservations(req, res) {
   const limit=Math.max(parseInt(pageSize,10)||10,1);
   const offset=Math.max((parseInt(page,10)||1)-1,0)*limit;
   const rows=await reservationModel.listBookings(userId,scope,limit,offset);
-  res.json({items:rows,page:Number(page),pageSize:limit});
+  const total=await reservationModel.countBookings(userId,scope);
+  res.json({items:rows,total,page:Number(page),pageSize:limit});
 }
 
 module.exports = { createReservation, cancelReservation ,listMyReservations};
