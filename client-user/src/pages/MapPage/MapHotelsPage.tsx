@@ -613,7 +613,7 @@ const MapHotelsPageInner: React.FC = () => {
           )
         }
         {
-          selectedDetail && (
+          selectedDetail && !coreCalOpen && (
             <Box ref={bottomCardRef} className="bottom-card-wrap">
               <Card className="hotel-card" sx={{ borderRadius: 2, cursor: 'pointer', position: 'relative' }} onClick={() => navigate(`/hotels/${selectedDetail.id}`)}>
                 {/* 图片区域：单张轮播（自动+左右切换），防穿透点击 */}
