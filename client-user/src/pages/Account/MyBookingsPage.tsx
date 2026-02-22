@@ -13,6 +13,14 @@ import backIcon from '../../image/返回.svg';
 // 列表范围枚举：与后端保持一致，仅 'upcoming'（即将入住）与 'past'（历史订单）
 type Scope = 'upcoming' | 'past';
 
+const statusMap: Record<string, string> = {
+  pending: '待处理/待确认',
+  confirmed: '已确认/预订成功',
+  cancelled: '已取消',
+  checked_in: '已入住',
+  checked_out: '已退房'
+};
+
 // 将 YYYY-MM-DD 或可解析的日期字符串格式化为标准展示文案
 function formatDate(d: string) {
   try {
@@ -63,7 +71,7 @@ const MyBookingsPage: React.FC = () => {
       const sizeArg = ps ?? bookingPageSize;
       const resp = await listMyReservations(s, pageArg, sizeArg);
       setItems(resp.items || []);
-      setBookingsTotal(Number(resp.total || 0));
+      setBookingsTotal(Number(((resp as any)?.total ?? resp.items?.length ?? 0)));
       setBookingPage(Number(resp.page || pageArg));
       setBookingPageSize(Number(resp.pageSize || sizeArg));
     } catch (e: any) {
@@ -200,7 +208,7 @@ const MyBookingsPage: React.FC = () => {
                 <Typography>晚数：{nightsBetween(it.check_in, it.check_out)}</Typography>
               </Box>
               <Box mt={1} display="flex" gap={2}>
-                <Typography>状态：{it.status}</Typography>
+                <Typography>状态：{statusMap[it.status] ?? it.status}</Typography>
               </Box>
               <Box mt={2} display="flex" gap={2}>
                 {scope === 'upcoming' && (
