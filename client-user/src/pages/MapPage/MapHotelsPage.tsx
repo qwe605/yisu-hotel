@@ -685,6 +685,7 @@ const MapHotelsPageInner: React.FC = () => {
         onClose={() => setSnackbarOpen(false)}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         TransitionComponent={(props: any) => <Slide {...props} direction="down" />}
+        sx={{ pointerEvents: 'none' }}
       >
         <Alert severity={snackbarSeverity} onClose={() => setSnackbarOpen(false)} sx={{ width: '100%' }}>
           {snackbarMsg}
