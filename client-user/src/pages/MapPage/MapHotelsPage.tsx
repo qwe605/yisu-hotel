@@ -96,6 +96,7 @@ const MapHotelsPageInner: React.FC = () => {
   const [centerHit, setCenterHit] = useState<string>('');
   const [imgIndex, setImgIndex] = useState<number>(0);
 
+  // 初始化定位：如果没有已有坐标则请求浏览器定位
   useEffect(() => {
     if (!navigator.geolocation) return;
     const doLocate = () => {
@@ -113,6 +114,7 @@ const MapHotelsPageInner: React.FC = () => {
     if (!userLat || !userLng) doLocate();
   }, []);
 
+  // 拉取酒店列表：加入取消标记，避免竞态导致旧数据覆盖
   useEffect(() => {
     let cancelled = false;
     const fetchList = async () => {
@@ -143,6 +145,7 @@ const MapHotelsPageInner: React.FC = () => {
     return () => { cancelled = true; };
   }, [q.keyword, q.check_in, q.check_out, q.minPrice, q.maxPrice, q.stars, q.rooms, q.guests, q.userLat, q.userLng, q.maxDistanceKm, userLat, userLng]);
 
+  // 解析 selectedId 并同步到地图中心
   useEffect(() => {
     const sid = q.selectedId ? Number(q.selectedId) : null;
     if (sid && hotels.length > 0) {
@@ -154,6 +157,7 @@ const MapHotelsPageInner: React.FC = () => {
     }
   }, [q.selectedId, hotels]);
 
+  // 收藏按钮：乐观更新，失败回滚并提示
   const handleToggleFavorite = (id: number) => {
     const next = !favorites[id];
     const before = collectIds;
@@ -181,6 +185,7 @@ const MapHotelsPageInner: React.FC = () => {
       });
   };
 
+  // 分享按钮：优先 Web Share，不支持则复制 URL
   const handleShare = async (id: number) => {
     const url = `${window.location.origin}/hotels/${id}`;
     let ok = false;
@@ -197,6 +202,7 @@ const MapHotelsPageInner: React.FC = () => {
     setSnackbarSeverity(ok ? 'success' : 'error');
     setSnackbarOpen(true);
   };
+  // 选中酒店详情与图片：selectedId 变化时请求
   useEffect(() => {
     const loadDetail = async () => {
       if (!selectedId) return;
@@ -214,6 +220,7 @@ const MapHotelsPageInner: React.FC = () => {
     loadDetail();
   }, [selectedId]);
 
+  // 初始化收藏：从用户资料 collect 映射到本地状态
   useEffect(() => {
     const initCollect = async () => {
       try {
@@ -234,6 +241,7 @@ const MapHotelsPageInner: React.FC = () => {
     initCollect();
   }, []);
 
+  // 用户位置图标：使用内嵌 SVG 提升清晰度
   const userIcon = useMemo(() => {
     const B = (window as any).BMapGL;
     if (!B) return null;
@@ -276,6 +284,7 @@ const MapHotelsPageInner: React.FC = () => {
     return () => clearInterval(t);
   }, [galleryImages, selectedId]);
 
+  // 价格标签缓存：记录 Label 实例与点击处理器，便于清理与样式更新
   const priceLabelsRef = useRef<Map<number, { label: any; click?: (e?: any) => void }>>(new Map());
   useEffect(() => {
     const map = mapRef.current;
@@ -286,6 +295,7 @@ const MapHotelsPageInner: React.FC = () => {
       try { map.removeOverlay(label); } catch (_) { }
     });
     priceLabelsRef.current.clear();
+    // 重建价格标签覆盖物
     hotels.forEach((h) => {
       if (!h.latitude || !h.longitude) return;
       const pt = new B.Point(h.longitude, h.latitude);
@@ -339,6 +349,7 @@ const MapHotelsPageInner: React.FC = () => {
       try { label.setZIndex(sel ? 1000 : 0); } catch (_) { }
     });
   }, [selectedId]);
+  // 手动定位：更新用户坐标并居中地图
   const handleRelocate = () => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
@@ -352,6 +363,7 @@ const MapHotelsPageInner: React.FC = () => {
       { enableHighAccuracy: true, timeout: 1000 }
     );
   };
+  // 关键词搜索：更新 URL 参数并使用百度本地搜索居中
   const handleSearch = () => {
     const kw = keyword.trim();
     const fmt = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -383,6 +395,7 @@ const MapHotelsPageInner: React.FC = () => {
     }
   };
 
+  // 安全中心点：缺失时回退到默认坐标
   const getSafeCenter = () => {
     const lng = center?.lng ?? userLng ?? 116.404;
     const lat = center?.lat ?? userLat ?? 39.915;
@@ -404,6 +417,7 @@ const MapHotelsPageInner: React.FC = () => {
     return c;
   };
 
+  // AK 检查与就绪兜底：缺少 AK 时提示用户配置
   useEffect(() => {
     if (akMissing) {
 
@@ -417,6 +431,7 @@ const MapHotelsPageInner: React.FC = () => {
     return () => clearTimeout(t);
   }, [akMissing, mapReady]);
 
+  // 隐藏开发错误覆盖层：避免遮挡地图；卸载时断开 MutationObserver
   useEffect(() => {
     const onWindowError = (event: ErrorEvent) => {
       const msg = String(event.message || '');
@@ -613,6 +628,7 @@ const MapHotelsPageInner: React.FC = () => {
           )
         }
         {
+          // 底部酒店卡片：日历打开时不显示，避免遮挡
           selectedDetail && !coreCalOpen && (
             <Box ref={bottomCardRef} className="bottom-card-wrap">
               <Card className="hotel-card" sx={{ borderRadius: 2, cursor: 'pointer', position: 'relative' }} onClick={() => navigate(`/hotels/${selectedDetail.id}`)}>
@@ -666,6 +682,7 @@ const MapHotelsPageInner: React.FC = () => {
           )
         }
 
+        {/* 日期选择抽屉：打开时覆盖地图，关闭后恢复卡片显示 */}
         {coreCalOpen && (
           <DateRangeSheet
             open={coreCalOpen}
@@ -679,12 +696,12 @@ const MapHotelsPageInner: React.FC = () => {
           />
         )}
       </Container >
+      {/* 顶部提示：pointer-events:none 不拦截胶囊点击 */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={2000}
         onClose={() => setSnackbarOpen(false)}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-        TransitionComponent={(props: any) => <Slide {...props} direction="down" />}
         sx={{ pointerEvents: 'none' }}
       >
         <Alert severity={snackbarSeverity} onClose={() => setSnackbarOpen(false)} sx={{ width: '100%' }}>
