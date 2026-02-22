@@ -246,6 +246,11 @@ const MapHotelsPageInner: React.FC = () => {
   }, [galleryImages, imgIndex]);
   const gotoPrev = () => setImgIndex((i) => (galleryImages.length ? (i - 1 + galleryImages.length) % galleryImages.length : 0));
   const gotoNext = () => setImgIndex((i) => (galleryImages.length ? (i + 1) % galleryImages.length : 0));
+  useEffect(() => {
+    if (!galleryImages.length || galleryImages.length <= 1) return;
+    const t = setInterval(() => gotoNext(), 3000);
+    return () => clearInterval(t);
+  }, [galleryImages, selectedId]);
 
   const priceLabelsRef = useRef<Map<number, any>>(new Map<number, any>());
   useEffect(() => {
@@ -662,30 +667,30 @@ const MapHotelsPageInner: React.FC = () => {
                     <Button className="gallery-nav prev" aria-label="上一张" onClick={gotoPrev}>‹</Button>
                     <CardMedia component="img" className="gallery-img" image={currentImageSrc} />
                     <Button className="gallery-nav next" aria-label="下一张" onClick={gotoNext}>›</Button>
+                    <Box className="gallery-actions">
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        aria-label="收藏"
+                        onClick={() => { if (selectedDetail) handleToggleFavorite(selectedDetail.id); }}
+                        sx={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: .5 }}
+                      >
+                        <img src={selectedDetail && favorites[selectedDetail.id] ? favOn : favOff} alt="收藏" style={{ width: 24, height: 24 }} />
+                        <Typography variant="caption">收藏</Typography>
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        aria-label="分享"
+                        onClick={() => { if (selectedDetail) handleShare(selectedDetail.id); }}
+                        sx={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: .5 }}
+                      >
+                        <img src={shareIcon} alt="分享" style={{ width: 24, height: 24 }} />
+                        <Typography variant="caption">分享</Typography>
+                      </Button>
+                    </Box>
                   </Box>
                 )}
-                <Box className="card-top-right" onClick={(e) => e.stopPropagation()}>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    aria-label="收藏"
-                    onClick={() => { if (selectedDetail) handleToggleFavorite(selectedDetail.id); }}
-                    sx={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: .5 }}
-                  >
-                    <img src={selectedDetail && favorites[selectedDetail.id] ? favOn : favOff} alt="收藏" style={{ width: 24, height: 24 }} />
-                    <Typography variant="caption">收藏</Typography>
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    aria-label="分享"
-                    onClick={() => { if (selectedDetail) handleShare(selectedDetail.id); }}
-                    sx={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: .5 }}
-                  >
-                    <img src={shareIcon} alt="分享" style={{ width: 24, height: 24 }} />
-                    <Typography variant="caption">分享</Typography>
-                  </Button>
-                </Box>
                 <CardContent sx={{ pt: 6 }}>
                   <Typography variant="h6">{selectedDetail.name_zh}</Typography>
                   <Typography color="primary">⭐ {selectedDetail.star_rating}</Typography>

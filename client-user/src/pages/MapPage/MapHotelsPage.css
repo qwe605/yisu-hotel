@@ -94,11 +94,17 @@
   overflow: hidden;
 }
 
+.map-container .gallery-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
 .map-container .gallery-nav {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 5;
   min-width: 32px;
   width: 32px;
   height: 32px;
