@@ -691,8 +691,8 @@ const MapHotelsPageInner: React.FC = () => {
                     </Box>
                   </Box>
                 )}
-                <CardContent sx={{ pt: 6 }}>
-                  <Typography variant="h6">{selectedDetail.name_zh}</Typography>
+                <CardContent sx={{ pt: 2 }}>
+                  <Typography variant="h6" sx={{ mb: 1 }}>{selectedDetail.name_zh}</Typography>
                   <Typography color="primary">⭐ {selectedDetail.star_rating}</Typography>
                   {selectedFeatures.length > 0 && (
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
