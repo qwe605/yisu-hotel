@@ -301,7 +301,7 @@ const MapHotelsPageInner: React.FC = () => {
         lineHeight: '16px'
       });
       map.addOverlay(label);
-      let click: (e?: any) => void | undefined;
+      let click: ((e?: any) => void) | undefined = undefined;
       if (typeof label.addEventListener === 'function') {
         click = () => {
           setSelectedId(h.id);
