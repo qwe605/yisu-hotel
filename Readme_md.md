@@ -69,6 +69,10 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL,
     role ENUM('admin', 'merchant', 'user') DEFAULT 'user',
     phone VARCHAR(20),
+    avatar_url VARCHAR(300),
+    collect TEXT,
+    status ENUM('active', 'disabled') DEFAULT 'active',
+    last_login TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
