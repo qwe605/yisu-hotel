@@ -101,38 +101,54 @@
   margin-top: 8px;
 }
 
-.map-container .gallery-nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 5;
-  min-width: 32px;
-  width: 32px;
-  height: 32px;
-  border-radius: 16px;
-  padding: 0;
-  line-height: 1;
-  font-size: 18px;
-  background: rgba(255, 255, 255, .9);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
+.map-container {
+  position: relative; 
+  width: 100%;
+  overflow: hidden;
 
-  .map-container .gallery-wrap .gallery-nav.prev {
-    left: 24px !important;
-  }
+  .gallery-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
 
-  .map-container .gallery-wrap .gallery-nav.next {
-    right: 24px !important;
-  }
-
-  /* 将操作区改为顺序流，放到图片下方 */
-  .map-container .card-top-right {
-    position: static;
-    top: auto;
-    right: auto;
-    z-index: auto;
-    margin-top: 8px;
-    background: transparent;
-    box-shadow: none;
+    width: 40px;      
+    height: 40px;
+    min-width: 40px;      
+    border-radius: 50%;  
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
     padding: 0;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(4px);
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    transition: all 0.2s ease; 
+
+    &.prev {
+      left: 16px;
+    }
+
+    &.next {
+      right: 16px;
+    }
+
+    &:hover {
+      background: #ffffff;
+      transform: translateY(-50%) scale(1.1); 
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    &:active {
+      transform: translateY(-50%) scale(0.95); 
+    }
+
+    font-size: 20px;
+    color: #333;
+    line-height: 0; 
   }
 }

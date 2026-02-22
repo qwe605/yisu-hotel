@@ -3,6 +3,8 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci || npm install
 COPY . .
+ARG REACT_APP_BAIDU_MAP_AK
+ENV REACT_APP_BAIDU_MAP_AK=$REACT_APP_BAIDU_MAP_AK
 RUN npm run build
 
 FROM node:20-alpine

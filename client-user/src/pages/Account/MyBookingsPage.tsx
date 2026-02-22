@@ -14,8 +14,8 @@ import backIcon from '../../image/返回.svg';
 type Scope = 'upcoming' | 'past';
 
 const statusMap: Record<string, string> = {
-  pending: '待处理/待确认',
-  confirmed: '已确认/预订成功',
+  pending: '待处理',
+  confirmed: '预订成功',
   cancelled: '已取消',
   checked_in: '已入住',
   checked_out: '已退房'
@@ -54,7 +54,7 @@ const MyBookingsPage: React.FC = () => {
   const [favoritesIds, setFavoritesIds] = useState<number[]>([]);
   const [favoriteHotels, setFavoriteHotels] = useState<Array<any>>([]);
   const [bookingPage, setBookingPage] = useState<number>(1);
-  const [bookingPageSize, setBookingPageSize] = useState<number>(5);
+  const [bookingPageSize, setBookingPageSize] = useState<number>(3);
   const [bookingsTotal, setBookingsTotal] = useState<number>(0);
   const [favoritesPage, setFavoritesPage] = useState<number>(1);
   const [favoritesPageSize, setFavoritesPageSize] = useState<number>(5);

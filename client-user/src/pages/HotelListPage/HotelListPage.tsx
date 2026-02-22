@@ -178,7 +178,7 @@ const HotelListPage: React.FC = () => {
         params.set('page', '1');
         params.set('pageSize', String(pageSize));
         navigate(`/hotels?${params.toString()}`);
-        setSnackbarMsg('定位成功');
+        setSnackbarMsg(`定位成功, 您当前位置为纬度: ${latitude.toFixed(6)}°, 经度: ${longitude.toFixed(6)}°`);
         setSnackbarSeverity('success');
         setSnackbarOpen(true);
         try {
@@ -288,7 +288,7 @@ const HotelListPage: React.FC = () => {
       const qtext = cityInput.trim();
       if (!qtext) {
         setSuggestItems([]);
-        setShowSuggest(true);
+        setShowSuggest(false);
         setCityMatches(hotCities);
         return;
       }

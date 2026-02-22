@@ -69,10 +69,7 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL,
     role ENUM('admin', 'merchant', 'user') DEFAULT 'user',
     phone VARCHAR(20),
-    avatar_url VARCHAR(300),
     collect TEXT,
-    status ENUM('active', 'disabled') DEFAULT 'active',
-    last_login TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -175,7 +172,7 @@ CREATE INDEX idx_bookings_dates ON bookings(check_in, check_out);
 CREATE INDEX idx_promotions_dates ON promotions(start_date, end_date);
 
 
-3. 完整项目目录结构
+1. 完整项目目录结构
 
 
 yisu-hotel-platform/
@@ -643,3 +640,6 @@ mysql -u root -p < database/init.sql
 6. 实现PWA功能
 7. 添加数据分析面板
 
+docker compose build --no-cache client
+
+docker compose up -d

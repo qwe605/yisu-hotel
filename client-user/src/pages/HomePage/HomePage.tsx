@@ -31,7 +31,6 @@ import { HotelListItem } from '../../types';
 const HomePage: React.FC = () => {
   // 城市/关键词与定位状态
   // - keyword: 备用字段（与 searchText 分离，保留兼容）；locLabel: 显示定位标签；locing: 定位中的 loading
-  const [keyword, setKeyword] = useState<string>('');
   const [locLabel, setLocLabel] = useState<string>('我的位置');
   const [locing, setLocing] = useState<boolean>(false);
   
@@ -251,11 +250,9 @@ const HomePage: React.FC = () => {
         setUserLng(longitude);
         try {
           const resp = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=zh`);
-          console.log(resp);
           const data = await resp.json();
           const province = data.principalSubdivision || '';
           const city = data.city;
-          const country = data.locality;
           const label = [province, city].filter(Boolean).join(' ');
           setLocLabel(label || '已定位');
           if (label) setSearchText(label);

@@ -32,7 +32,6 @@ export async function listMyReservations(scope: 'upcoming' | 'past' = 'upcoming'
     star_rating: number;
     address: string;
   }>;
-  total: number;
   page: number;
   pageSize: number;
 }> {
