@@ -61,10 +61,10 @@ const MapHotelsPageInner: React.FC = () => {
     next.setHours(0, 0, 0, 0);
     return next;
   });
-  const [nights, setNights] = useState<number>(() => {
+  const nights = useMemo<number>(() => {
     const ms = (new Date(checkOut).getTime() - new Date(checkIn).getTime());
     return Math.max(1, Math.round(ms / (24 * 3600 * 1000)));
-  });
+  }, [checkIn, checkOut]);
   const [coreCalOpen, setCoreCalOpen] = useState<boolean>(false);
   const [hotels, setHotels] = useState<HotelListItem[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(q.selectedId ? Number(q.selectedId) : null);
@@ -87,7 +87,6 @@ const MapHotelsPageInner: React.FC = () => {
   const [lastEvent, setLastEvent] = useState<string>('');
   const [wheelSeen, setWheelSeen] = useState<boolean>(false);
   const mapWrapRef = useRef<HTMLDivElement | null>(null);
-  const [debugOpen, setDebugOpen] = useState<boolean>(true);
   const [methodInfo, setMethodInfo] = useState<Record<string, boolean>>({});
   const [overlayInfo, setOverlayInfo] = useState<Array<{ name: string; visible: boolean; pointerEvents: string; zIndex: string; interceptsCenter: boolean; rect: string }>>([]);
   const [lastTarget, setLastTarget] = useState<string>('');
@@ -115,27 +114,33 @@ const MapHotelsPageInner: React.FC = () => {
   }, []);
 
   useEffect(() => {
-
+    let cancelled = false;
     const fetchList = async () => {
-      const resp = await searchHotels({
-        keyword: q.keyword,
-        check_in: q.check_in,
-        check_out: q.check_out,
-        minPrice: q.minPrice ? Number(q.minPrice) : undefined,
-        maxPrice: q.maxPrice ? Number(q.maxPrice) : undefined,
-        stars: q.stars ? Number(q.stars) : undefined,
-        rooms: q.rooms ? Number(q.rooms) : undefined,
-        guests: q.guests ? Number(q.guests) : undefined,
-        userLat: userLat || (q.userLat ? Number(q.userLat) : undefined),
-        userLng: userLng || (q.userLng ? Number(q.userLng) : undefined),
-        maxDistanceKm: q.maxDistanceKm ? Number(q.maxDistanceKm) : undefined,
-        sort: 'distanceAsc',
-        page: 1,
-        pageSize: 100
-      });
-      setHotels(Array.isArray((resp as any)?.items) ? (resp as any).items : []);
+      try {
+        const resp = await searchHotels({
+          keyword: q.keyword,
+          check_in: q.check_in,
+          check_out: q.check_out,
+          minPrice: q.minPrice ? Number(q.minPrice) : undefined,
+          maxPrice: q.maxPrice ? Number(q.maxPrice) : undefined,
+          stars: q.stars ? Number(q.stars) : undefined,
+          rooms: q.rooms ? Number(q.rooms) : undefined,
+          guests: q.guests ? Number(q.guests) : undefined,
+          userLat: userLat || (q.userLat ? Number(q.userLat) : undefined),
+          userLng: userLng || (q.userLng ? Number(q.userLng) : undefined),
+          maxDistanceKm: q.maxDistanceKm ? Number(q.maxDistanceKm) : undefined,
+          sort: 'distanceAsc',
+          page: 1,
+          pageSize: 100
+        });
+        if (cancelled) return;
+        setHotels(Array.isArray((resp as any)?.items) ? (resp as any).items : []);
+      } catch {
+        if (cancelled) return;
+      }
     };
     fetchList();
+    return () => { cancelled = true; };
   }, [q.keyword, q.check_in, q.check_out, q.minPrice, q.maxPrice, q.stars, q.rooms, q.guests, q.userLat, q.userLng, q.maxDistanceKm, userLat, userLng]);
 
   useEffect(() => {
@@ -271,13 +276,14 @@ const MapHotelsPageInner: React.FC = () => {
     return () => clearInterval(t);
   }, [galleryImages, selectedId]);
 
-  const priceLabelsRef = useRef<Map<number, any>>(new Map<number, any>());
+  const priceLabelsRef = useRef<Map<number, { label: any; click?: (e?: any) => void }>>(new Map());
   useEffect(() => {
     const map = mapRef.current;
     const B = (window as any).BMapGL;
     if (!map || !B || !Array.isArray(hotels)) return;
-    priceLabelsRef.current.forEach((overlay: any) => {
-      try { map.removeOverlay(overlay); } catch (_) { }
+    priceLabelsRef.current.forEach(({ label, click }) => {
+      try { if (click) label.removeEventListener?.('click', click); } catch (_) { }
+      try { map.removeOverlay(label); } catch (_) { }
     });
     priceLabelsRef.current.clear();
     hotels.forEach((h) => {
@@ -295,18 +301,20 @@ const MapHotelsPageInner: React.FC = () => {
         lineHeight: '16px'
       });
       map.addOverlay(label);
-      priceLabelsRef.current.set(h.id, label);
+      let click: (e?: any) => void | undefined;
       if (typeof label.addEventListener === 'function') {
-        label.addEventListener('click', () => {
+        click = () => {
           setSelectedId(h.id);
           if (h.longitude && h.latitude) setCenter({ lng: h.longitude, lat: h.latitude });
-        });
+        };
+        label.addEventListener('click', click);
       }
+      priceLabelsRef.current.set(h.id, { label, click });
     });
   }, [hotels, mapReady]);
   useEffect(() => {
     const selected = selectedId;
-    priceLabelsRef.current.forEach((label: any, id: number) => {
+    priceLabelsRef.current.forEach(({ label }, id: number) => {
       const sel = id === selected;
       const style = sel ? {
         backgroundColor: '#1677ff',
@@ -341,7 +349,7 @@ const MapHotelsPageInner: React.FC = () => {
         setCenter({ lng: longitude, lat: latitude });
       },
       () => { },
-      { enableHighAccuracy: true, timeout: 8000 }
+      { enableHighAccuracy: true, timeout: 1000 }
     );
   };
   const handleSearch = () => {
@@ -432,7 +440,10 @@ const MapHotelsPageInner: React.FC = () => {
     const mo = new MutationObserver(() => hide());
     mo.observe(document.documentElement, { childList: true, subtree: true });
     (window as any).__map_overlay_mo = mo;
-    return () => window.removeEventListener('error', onWindowError);
+    return () => {
+      window.removeEventListener('error', onWindowError);
+      try { (window as any).__map_overlay_mo?.disconnect?.(); } catch (_) { }
+    };
   }, []);
 
   useEffect(() => {
@@ -445,23 +456,7 @@ const MapHotelsPageInner: React.FC = () => {
   useEffect(() => {
     const wrap = mapWrapRef.current;
     if (!wrap) return;
-    const onWheel = () => {
-      setWheelSeen(true);
-      setLastEvent('wheel');
-    };
-    const onPointerDown = (e: any) => {
-      setLastEvent('pointerdown');
-      const t = e.target as HTMLElement;
-      setLastTarget(`${t.tagName.toLowerCase()}${t.id ? `#${t.id}` : ''}${t.className ? `.${String(t.className).split(' ').join('.')}` : ''}`);
-    };
-    wrap.addEventListener('wheel', onWheel, { passive: true });
-    wrap.addEventListener('pointerdown', onPointerDown, { passive: true });
-    const rect = wrap.getBoundingClientRect();
-    setCenterXY({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
-    return () => {
-      wrap.removeEventListener('wheel', onWheel as any);
-      wrap.removeEventListener('pointerdown', onPointerDown as any);
-    };
+    return () => { };
   }, []);
 
   useEffect(() => {
@@ -493,71 +488,10 @@ const MapHotelsPageInner: React.FC = () => {
   }, [wheelSeen, wheelEnabled]);
 
   useEffect(() => {
-    const map = mapRef.current;
-    const methods = [
-      'enableDragging',
-      'disableDragging',
-      'enableScrollWheelZoom',
-      'disableScrollWheelZoom',
-      'enableContinuousZoom',
-      'addEventListener',
-      'removeEventListener',
-      'setCenter',
-      'getCenter',
-      'setZoom',
-      'getZoom'
-    ];
-    if (map) {
-      const info: Record<string, boolean> = {};
-      methods.forEach((m) => {
-        info[m] = typeof (map as any)[m] === 'function';
-      });
-      setMethodInfo(info);
-
-    }
   }, [mapRef.current, mapReady]);
 
   useEffect(() => {
-    const collect = () => {
-      const res: Array<{ name: string; visible: boolean; pointerEvents: string; zIndex: string; interceptsCenter: boolean; rect: string }> = [];
-      const pushInfo = (el: HTMLElement | null, name: string) => {
-        if (!el) {
-          res.push({ name, visible: false, pointerEvents: 'n/a', zIndex: 'n/a', interceptsCenter: false, rect: 'n/a' });
-          return;
-        }
-        const cs = window.getComputedStyle(el);
-        const rect = el.getBoundingClientRect();
-        const pt = centerXY;
-        const hit = !!pt && rect.left <= pt.x && pt.x <= rect.right && rect.top <= pt.y && pt.y <= rect.bottom && cs.pointerEvents !== 'none' && cs.visibility !== 'hidden' && cs.display !== 'none';
-        res.push({
-          name,
-          visible: cs.visibility !== 'hidden' && cs.display !== 'none',
-          pointerEvents: cs.pointerEvents,
-          zIndex: cs.zIndex,
-          interceptsCenter: hit,
-          rect: `${Math.round(rect.left)},${Math.round(rect.top)},${Math.round(rect.right)},${Math.round(rect.bottom)}`
-        });
-      };
-      const header = document.querySelector('.top-controls-sticky') as HTMLElement | null;
-      const pill = document.querySelector('.core-header.pill') as HTMLElement | null;
-      const diag = null;
-      pushInfo(header, 'header');
-      pushInfo(pill, 'pill');
-      pushInfo(bottomCardRef.current, 'bottom-card');
-      pushInfo(calendarMaskRef.current, 'calendar-mask');
-      pushInfo(diag, 'diag-panel');
-      setOverlayInfo(res);
-      const pt = centerXY;
-      if (pt) {
-        const el = document.elementFromPoint(pt.x, pt.y) as HTMLElement | null;
-        const desc = el ? `${el.tagName.toLowerCase()}${el.id ? `#${el.id}` : ''}${el.className ? `.${String(el.className).split(' ').join('.')}` : ''}` : 'null';
-        setCenterHit(desc);
-
-      }
-
-    };
-    collect();
-  }, [coreCalOpen, selectedDetail, centerXY]);
+  }, [coreCalOpen, selectedDetail]);
 
   return (
     <>
