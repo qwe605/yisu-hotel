@@ -1,3 +1,22 @@
+/** 
+ * 地图酒店页（MapHotelsPage）
+ * 
+ * 功能概览：
+ * - 顶部胶囊控件：返回、定位、日期选择、搜索
+ * - 百度地图展示：用户位置、酒店价格标签、选中酒店的信息窗
+ * - 底部酒店卡片：展示当前选中的酒店详情、图片轮播、收藏与分享
+ * - 收藏同步：与个人收藏（用户表中的 collect 列）保持一致
+ * 
+ * 主要数据流：
+ * - URL 查询参数（useLocation）→ useQuery：驱动搜索与初始中心点
+ * - 地图交互（BMapGL）→ 更新中心点、价格标签、选中状态
+ * - 选中酒店（selectedId）→ 拉取详情（getHotelDetail）→ 显示卡片与图片
+ * - 收藏按钮 → 调用 updateMyCollect，成功后提示并更新本地 favorites/collectIds
+ * 
+ * 关键交互点：
+ * - 图片区域支持单张轮播，自动轮播+左右切换；收藏/分享按钮位于图片下方，防止遮挡
+ * - 地图价格标签可点击以切换选中酒店
+ */
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, Button, Container, Typography, Card, CardMedia, CardContent, Snackbar, Alert } from '@mui/material';
@@ -47,9 +66,6 @@ const MapHotelsPageInner: React.FC = () => {
     return Math.max(1, Math.round(ms / (24 * 3600 * 1000)));
   });
   const [coreCalOpen, setCoreCalOpen] = useState<boolean>(false);
-  const [calendarPhase, setCalendarPhase] = useState<'start' | 'end'>('start');
-  const [tempEnd, setTempEnd] = useState<Date | null>(null);
-  const [justSelectedEnd, setJustSelectedEnd] = useState<boolean>(false);
   const [hotels, setHotels] = useState<HotelListItem[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(q.selectedId ? Number(q.selectedId) : null);
   const [selectedDetail, setSelectedDetail] = useState<HotelDetail | null>(null);
@@ -67,9 +83,7 @@ const MapHotelsPageInner: React.FC = () => {
     return !(lsAK || envAK);
   });
   const mapRef = useRef<any>(null);
-  const [dragEnabled, setDragEnabled] = useState<boolean>(false);
   const [wheelEnabled, setWheelEnabled] = useState<boolean>(false);
-  const [diagMsg, setDiagMsg] = useState<string | null>(null);
   const [lastEvent, setLastEvent] = useState<string>('');
   const [wheelSeen, setWheelSeen] = useState<boolean>(false);
   const mapWrapRef = useRef<HTMLDivElement | null>(null);
@@ -232,20 +246,25 @@ const MapHotelsPageInner: React.FC = () => {
     return icon;
   }, [mapReady]);
 
+  // 图片画廊：以后台返回的 images 为数据源，缺失时降级为空数组
   const galleryImages = useMemo(() => {
     const imgs = Array.isArray(selectedImages) ? selectedImages : [];
     if (imgs.length > 0) return imgs;
     return [];
   }, [selectedImages]);
+  // 切换选中酒店时，将轮播索引复位为第一张
   useEffect(() => { setImgIndex(0); }, [selectedImages]);
+  // 当前展示图片：兼容后端返回的不同字段名（image_url/url/src）
   const currentImageSrc = useMemo(() => {
     const imgs = galleryImages;
     if (!imgs.length) return '';
     const img = imgs[Math.max(0, Math.min(imgIndex, imgs.length - 1))];
     return typeof img === 'string' ? img : (img?.image_url || img?.url || img?.src || '');
   }, [galleryImages, imgIndex]);
+  // 轮播：上一张/下一张
   const gotoPrev = () => setImgIndex((i) => (galleryImages.length ? (i - 1 + galleryImages.length) % galleryImages.length : 0));
   const gotoNext = () => setImgIndex((i) => (galleryImages.length ? (i + 1) % galleryImages.length : 0));
+  // 自动轮播：有多张图片时，每 3 秒切换一张
   useEffect(() => {
     if (!galleryImages.length || galleryImages.length <= 1) return;
     const t = setInterval(() => gotoNext(), 3000);
@@ -446,6 +465,7 @@ const MapHotelsPageInner: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    // 地图事件绑定：拖拽/缩放开始与结束，便于调试与交互提示
     const map = mapRef.current;
     if (!map) return;
     const onDragStart = () => setLastEvent('dragstart');
@@ -550,7 +570,7 @@ const MapHotelsPageInner: React.FC = () => {
               <span className="divider" aria-hidden="true" />
               <Button
                 className="date-pill"
-                onClick={() => { setCalendarPhase('start'); setCoreCalOpen(true); }}
+                onClick={() => { setCoreCalOpen(true); }}
                 aria-label="选择入住与离店日期"
               >
                 <div className="date-col">
@@ -662,6 +682,7 @@ const MapHotelsPageInner: React.FC = () => {
           selectedDetail && (
             <Box ref={bottomCardRef} className="bottom-card-wrap">
               <Card className="hotel-card" sx={{ borderRadius: 2, cursor: 'pointer', position: 'relative' }} onClick={() => navigate(`/hotels/${selectedDetail.id}`)}>
+                {/* 图片区域：单张轮播（自动+左右切换），防穿透点击 */}
                 {galleryImages.length > 0 && (
                   <Box className="gallery-wrap" onClick={(e) => e.stopPropagation()}>
                     <Button className="gallery-nav prev" aria-label="上一张" onClick={gotoPrev}>‹</Button>
