@@ -19,7 +19,7 @@
  */
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Box, Button, Container, Typography, Card, CardMedia, CardContent, Snackbar, Alert } from '@mui/material';
+import { Box, Button, Container, Typography, Card, CardMedia, CardContent, Snackbar, Alert, Slide } from '@mui/material';
 import { Map as BMapGLMap, Marker, NavigationControl, InfoWindow, MapApiLoaderHOC } from 'react-bmapgl';
 import '../HotelListPage/HotelListPage.css';
 import DateRangeSheet from '../../components/DateRangeSheet/DateRangeSheet';
@@ -683,7 +683,8 @@ const MapHotelsPageInner: React.FC = () => {
         open={snackbarOpen}
         autoHideDuration={2000}
         onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        TransitionComponent={(props: any) => <Slide {...props} direction="down" />}
       >
         <Alert severity={snackbarSeverity} onClose={() => setSnackbarOpen(false)} sx={{ width: '100%' }}>
           {snackbarMsg}
