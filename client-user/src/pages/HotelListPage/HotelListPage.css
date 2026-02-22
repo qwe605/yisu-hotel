@@ -484,6 +484,10 @@
   display: flex;
   gap: 8px;
   z-index: 2;
+  background: #fff;
+  border-radius: 10px;
+  padding: 6px 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .hotel-image {

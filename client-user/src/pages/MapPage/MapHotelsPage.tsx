@@ -679,7 +679,7 @@ const MapHotelsPageInner: React.FC = () => {
                     })}
                   </Box>
                 )}
-                <CardContent>
+                <CardContent sx={{ pt: 6 }}>
                   <Typography variant="h6">{selectedDetail.name_zh}</Typography>
                   <Typography color="primary">⭐ {selectedDetail.star_rating}</Typography>
                   {selectedFeatures.length > 0 && (
