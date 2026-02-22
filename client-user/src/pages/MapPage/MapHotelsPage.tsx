@@ -646,7 +646,7 @@ const MapHotelsPageInner: React.FC = () => {
         {
           selectedDetail && (
             <Box ref={bottomCardRef} className="bottom-card-wrap">
-              <Card sx={{ borderRadius: 2, cursor: 'pointer', position: 'relative' }} onClick={() => navigate(`/hotels/${selectedDetail.id}`)}>
+              <Card className="hotel-card" sx={{ borderRadius: 2, cursor: 'pointer', position: 'relative' }} onClick={() => navigate(`/hotels/${selectedDetail.id}`)}>
                 <Box className="card-top-right">
                   <Button
                     variant="outlined"
