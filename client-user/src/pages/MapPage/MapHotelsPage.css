@@ -116,12 +116,12 @@
   background: rgba(255, 255, 255, .9);
   box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
 
-  .map-container .gallery-nav.prev {
-    left: 16px;
+  .map-container .gallery-wrap .gallery-nav.prev {
+    left: 24px !important;
   }
 
-  .map-container .gallery-nav.next {
-    right: 16px;
+  .map-container .gallery-wrap .gallery-nav.next {
+    right: 24px !important;
   }
 
   /* 将操作区改为顺序流，放到图片下方 */
