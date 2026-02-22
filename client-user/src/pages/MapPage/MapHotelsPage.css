@@ -117,11 +117,11 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
 
   .map-container .gallery-nav.prev {
-    left: 8px;
+    left: 16px;
   }
 
   .map-container .gallery-nav.next {
-    right: 8px;
+    right: 16px;
   }
 
   /* 将操作区改为顺序流，放到图片下方 */
