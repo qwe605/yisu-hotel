@@ -81,6 +81,7 @@ const MapHotelsPageInner: React.FC = () => {
   const bottomCardRef = useRef<HTMLDivElement | null>(null);
   const calendarMaskRef = useRef<HTMLDivElement | null>(null);
   const [centerHit, setCenterHit] = useState<string>('');
+  const [imgIndex, setImgIndex] = useState<number>(0);
 
   useEffect(() => {
     if (!navigator.geolocation) return;
@@ -236,6 +237,15 @@ const MapHotelsPageInner: React.FC = () => {
     if (imgs.length > 0) return imgs;
     return [];
   }, [selectedImages]);
+  useEffect(() => { setImgIndex(0); }, [selectedImages]);
+  const currentImageSrc = useMemo(() => {
+    const imgs = galleryImages;
+    if (!imgs.length) return '';
+    const img = imgs[Math.max(0, Math.min(imgIndex, imgs.length - 1))];
+    return typeof img === 'string' ? img : (img?.image_url || img?.url || img?.src || '');
+  }, [galleryImages, imgIndex]);
+  const gotoPrev = () => setImgIndex((i) => (galleryImages.length ? (i - 1 + galleryImages.length) % galleryImages.length : 0));
+  const gotoNext = () => setImgIndex((i) => (galleryImages.length ? (i + 1) % galleryImages.length : 0));
 
   const priceLabelsRef = useRef<Map<number, any>>(new Map<number, any>());
   useEffect(() => {
@@ -647,12 +657,19 @@ const MapHotelsPageInner: React.FC = () => {
           selectedDetail && (
             <Box ref={bottomCardRef} className="bottom-card-wrap">
               <Card className="hotel-card" sx={{ borderRadius: 2, cursor: 'pointer', position: 'relative' }} onClick={() => navigate(`/hotels/${selectedDetail.id}`)}>
-                <Box className="card-top-right">
+                {galleryImages.length > 0 && (
+                  <Box className="gallery-wrap" onClick={(e) => e.stopPropagation()}>
+                    <Button className="gallery-nav prev" aria-label="上一张" onClick={gotoPrev}>‹</Button>
+                    <CardMedia component="img" className="gallery-img" image={currentImageSrc} />
+                    <Button className="gallery-nav next" aria-label="下一张" onClick={gotoNext}>›</Button>
+                  </Box>
+                )}
+                <Box className="card-top-right" onClick={(e) => e.stopPropagation()}>
                   <Button
                     variant="outlined"
                     size="small"
                     aria-label="收藏"
-                    onClick={(e) => { e.stopPropagation(); if (selectedDetail) handleToggleFavorite(selectedDetail.id); }}
+                    onClick={() => { if (selectedDetail) handleToggleFavorite(selectedDetail.id); }}
                     sx={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: .5 }}
                   >
                     <img src={selectedDetail && favorites[selectedDetail.id] ? favOn : favOff} alt="收藏" style={{ width: 24, height: 24 }} />
@@ -662,23 +679,13 @@ const MapHotelsPageInner: React.FC = () => {
                     variant="outlined"
                     size="small"
                     aria-label="分享"
-                    onClick={(e) => { e.stopPropagation(); if (selectedDetail) handleShare(selectedDetail.id); }}
+                    onClick={() => { if (selectedDetail) handleShare(selectedDetail.id); }}
                     sx={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: .5 }}
                   >
                     <img src={shareIcon} alt="分享" style={{ width: 24, height: 24 }} />
                     <Typography variant="caption">分享</Typography>
                   </Button>
                 </Box>
-                {galleryImages.length > 0 && (
-                  <Box className="gallery-row">
-                    {galleryImages.map((img: any, idx: number) => {
-                      const src = typeof img === 'string'
-                        ? img
-                        : (img?.image_url || img?.url || img?.src || '');
-                      return <CardMedia key={idx} component="img" className="gallery-img" image={src} />;
-                    })}
-                  </Box>
-                )}
                 <CardContent sx={{ pt: 6 }}>
                   <Typography variant="h6">{selectedDetail.name_zh}</Typography>
                   <Typography color="primary">⭐ {selectedDetail.star_rating}</Typography>

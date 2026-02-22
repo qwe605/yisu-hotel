@@ -81,7 +81,51 @@
 
 /* 图片画廊图片 */
 .map-container .gallery-img {
-  width: 180px;
-  height: 120px;
+  width: 100%;
+  max-height: 220px;
   border-radius: 4px;
+  object-fit: cover;
+}
+
+/* 单张轮播容器 */
+.map-container .gallery-wrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.map-container .gallery-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  min-width: 32px;
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  padding: 0;
+  line-height: 1;
+  font-size: 18px;
+  background: rgba(255, 255, 255, .9);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
+}
+
+.map-container .gallery-nav.prev {
+  left: 8px;
+}
+
+.map-container .gallery-nav.next {
+  right: 8px;
+}
+
+/* 将操作区改为顺序流，放到图片下方 */
+.map-container .card-top-right {
+  position: static;
+  top: auto;
+  right: auto;
+  z-index: auto;
+  margin-top: 8px;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
 }
