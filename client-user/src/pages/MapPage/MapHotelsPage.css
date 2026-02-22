@@ -103,8 +103,8 @@
 
 .map-container .gallery-nav {
   position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 50%;
+  transform: translateY(-50%);
   z-index: 5;
   min-width: 32px;
   width: 32px;
@@ -117,11 +117,11 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
 
   .map-container .gallery-nav.prev {
-    top: 8px;
+    left: 8px;
   }
 
   .map-container .gallery-nav.next {
-    bottom: 8px;
+    right: 8px;
   }
 
   /* 将操作区改为顺序流，放到图片下方 */
@@ -135,3 +135,4 @@
     box-shadow: none;
     padding: 0;
   }
+}
