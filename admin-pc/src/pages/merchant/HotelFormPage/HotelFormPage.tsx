@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Container, Box, Typography, TextField, Button, Chip, Divider, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogActions, List, ListItem, ListItemText } from '@mui/material';
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 
 type RoomType = { id: number; name: string; base_price: number; capacity: number; amenities: string };
 type Feature = { id: number; name: string; type: 'attraction' | 'transport' | 'mall'; distance?: string };
@@ -79,22 +79,22 @@ export default function HotelFormPage() {
       <Typography variant="h5" fontWeight={700}>酒店信息录入/编辑</Typography>
       <Box mt={2}>
         <Grid container spacing={2}>
-          <Grid xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField fullWidth label="酒店名称(中文)" value={nameZh} onChange={e => setNameZh(e.target.value)} />
           </Grid>
-          <Grid xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <TextField fullWidth label="酒店名称(英文)" value={nameEn} onChange={e => setNameEn(e.target.value)} />
           </Grid>
-          <Grid xs={12} md={8}>
+          <Grid size={{ xs: 12, md: 8 }}>
             <TextField fullWidth label="地址" value={address} onChange={e => setAddress(e.target.value)} />
           </Grid>
-          <Grid xs={6} md={2}>
+          <Grid size={{ xs: 6, md: 2 }}>
             <TextField fullWidth label="星级(1-5)" value={star} onChange={e => setStar(Number(e.target.value))} />
           </Grid>
-          <Grid xs={6} md={1.5}>
+          <Grid size={{ xs: 6, md: 1 }}>
             <TextField fullWidth label="纬度" value={latitude} onChange={e => setLatitude(Number(e.target.value))} />
           </Grid>
-          <Grid xs={6} md={1.5}>
+          <Grid size={{ xs: 6, md: 1 }}>
             <TextField fullWidth label="经度" value={longitude} onChange={e => setLongitude(Number(e.target.value))} />
           </Grid>
         </Grid>
@@ -120,7 +120,7 @@ export default function HotelFormPage() {
         </Box>
         <Grid container spacing={2} mt={1}>
           {roomTypes.map(rt => (
-            <Grid xs={12} md={6} key={rt.id}>
+            <Grid size={{ xs: 12, md: 6 }} key={rt.id}>
               <Box border="1px solid #ddd" borderRadius={1} p={2} display="flex" flexDirection="column" gap={1}>
                 <TextField label="房型名称" value={rt.name} onChange={e => updateRoomType(rt.id, { name: e.target.value })} />
                 <TextField label="基础价格" value={rt.base_price} onChange={e => updateRoomType(rt.id, { base_price: Number(e.target.value) })} />
@@ -144,7 +144,7 @@ export default function HotelFormPage() {
         </Box>
         <Grid container spacing={2} mt={1}>
           {features.map(f => (
-            <Grid xs={12} md={6} key={f.id}>
+            <Grid size={{ xs: 12, md: 6 }} key={f.id}>
               <Box border="1px solid #ddd" borderRadius={1} p={2} display="flex" flexDirection="column" gap={1}>
                 <TextField label="名称" value={f.name} onChange={e => updateFeature(f.id, { name: e.target.value })} />
                 <TextField label="类型(attraction/transport/mall)" value={f.type} onChange={e => updateFeature(f.id, { type: e.target.value as any })} />
@@ -167,7 +167,7 @@ export default function HotelFormPage() {
         </Box>
         <Grid container spacing={2} mt={1}>
           {promotions.map(p => (
-            <Grid xs={12} md={6} key={p.id}>
+            <Grid size={{ xs: 12, md: 6 }} key={p.id}>
               <Box border="1px solid #ddd" borderRadius={1} p={2} display="flex" flexDirection="column" gap={1}>
                 <TextField label="名称" value={p.name} onChange={e => updatePromotion(p.id, { name: e.target.value })} />
                 <TextField label="类型(percentage/fixed/package)" value={p.discount_type} onChange={e => updatePromotion(p.id, { discount_type: e.target.value as any })} />
