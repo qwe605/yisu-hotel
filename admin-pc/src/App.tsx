@@ -17,7 +17,13 @@ function PrivateRoute({ roles, children }: { roles: string[]; children: React.Re
 function App() {
   const role = localStorage.getItem('role') || '';
   const token = localStorage.getItem('token') || '';
-  const defaultPath = token ? (role === 'admin' ? '/admin/audit' : '/merchant/hotels/new') : '/login';
+  const defaultPath = token
+    ? (role === 'admin'
+      ? '/admin/audit'
+      : role === 'merchant'
+        ? '/merchant/hotels/new'
+        : '/login')
+    : '/login';
   return (
     <BrowserRouter>
       <Routes>

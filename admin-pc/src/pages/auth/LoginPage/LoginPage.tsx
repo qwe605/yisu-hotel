@@ -33,10 +33,13 @@ export default function LoginPage() {
       localStorage.setItem('userId', String(data?.id ?? ''));
       localStorage.setItem('username', String(data?.username ?? ''));
       localStorage.setItem('role', String(data?.role ?? ''));
-      if (String(data?.role) === 'admin') {
+      const role = String(data?.role || '').toLowerCase();
+      if (role === 'admin') {
         navigate('/admin/audit');
-      } else {
+      } else if (role === 'merchant') {
         navigate('/merchant/hotels/new');
+      } else {
+        setError('当前账号无管理端访问权限');
       }
     } catch (e: any) {
       setError(e?.message || '登录失败');
