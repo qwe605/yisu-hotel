@@ -45,7 +45,7 @@ async function login(req, res) {
 
 async function register(req, res) {
   try {
-    const { username, email, phone, password } = req.body || {};
+    const { username, email, phone, password, role } = req.body || {};
     if (!username || !email || !phone || !password) {
       res.status(400).json({ message: '缺少必要参数' });
       return;
@@ -55,10 +55,12 @@ async function register(req, res) {
       res.status(409).json({ message: '用户名/邮箱/手机号已存在' });
       return;
     }
-    // 生成盐并哈希明文密码，避免明文入库
+    const roleNorm = (String(role || 'user')).toLowerCase();
+    const allowed = ['admin', 'merchant', 'user'];
+    const finalRole = allowed.includes(roleNorm) ? roleNorm : 'user';
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(String(password), salt);
-    const id = await userModel.createUser({ username, email, phone, passwordHash: hash }, process.env.DB_NAME);
+    const id = await userModel.createUser({ username, email, phone, passwordHash: hash, role: finalRole }, process.env.DB_NAME);
     res.json({ id });
   } catch (err) {
     console.error('register error:', { code: err?.code, sqlMessage: err?.sqlMessage, sql: err?.sql });

@@ -32,12 +32,12 @@ async function existsUser(username, email, phone, dbName) {
   return !!(rows && rows.length > 0);
 }
 
-async function createUser({ username, email, phone, passwordHash }, dbName) {
+async function createUser({ username, email, phone, passwordHash, role }, dbName) {
   const tbl = await resolveUserTable(dbName);
   const [result] = await pool.query(
     `INSERT INTO ${tbl} (username, email, phone, password_hash, role, created_at, updated_at)
-     VALUES (?, ?, ?, ?, 'user', NOW(), NOW())`,
-    [username, email, phone, passwordHash]
+     VALUES (?, ?, ?, ?, ?, NOW(), NOW())`,
+    [username, email, phone, passwordHash, role || 'user']
   );
   return result.insertId;
 }
