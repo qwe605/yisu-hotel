@@ -29,12 +29,10 @@ export default function LoginPage() {
     try {
       const data = await postJSON('http://localhost:3001/api/auth/login', { identifier, password });
       const token = data?.token;
-      if (remember) {
-        localStorage.setItem('token', token || '');
-        localStorage.setItem('userId', String(data?.id ?? ''));
-        localStorage.setItem('username', String(data?.username ?? ''));
-        localStorage.setItem('role', String(data?.role ?? ''));
-      }
+      localStorage.setItem('token', token || '');
+      localStorage.setItem('userId', String(data?.id ?? ''));
+      localStorage.setItem('username', String(data?.username ?? ''));
+      localStorage.setItem('role', String(data?.role ?? ''));
       if (String(data?.role) === 'admin') {
         navigate('/admin/audit');
       } else {
